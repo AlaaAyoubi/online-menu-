@@ -47,6 +47,7 @@ const UI_STRINGS = {
         footerContact: 'Questions? Call +966 5X XXX XXXX',
         footerCopyright: '© 2026 Foodle. All rights reserved.',
         footerPoweredBy: 'Powered by',
+        backToTop: 'Back to top',
         items: 'items',
         item: 'item',
         loadError: 'Failed to load menu. Please try again.',
@@ -94,6 +95,7 @@ const UI_STRINGS = {
         footerContact: 'استفسارات؟ اتصل على +966 5X XXX XXXX',
         footerCopyright: '© 2026 فودل. جميع الحقوق محفوظة.',
         footerPoweredBy: 'مدعوم من',
+        backToTop: 'العودة للأعلى',
         items: 'أصناف',
         item: 'صنف',
         loadError: 'فشل تحميل القائمة. حاول مجدداً.',
@@ -129,6 +131,7 @@ function switchLanguage(lang) {
     initBrandLogo();
     applyFiltersAndRender();
     updateBasketUI();
+    positionBackToTopFab();
 }
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -493,6 +496,7 @@ function toggleCartPanel(isOpen) {
         sidebar.classList.remove("open");
         overlay.classList.remove("open");
     }
+    updateBackToTopButton();
 }
 
 // ─── Basket Logic ────────────────────────────────────────────────────────────
@@ -615,6 +619,7 @@ function openProductModal(id, triggerEl = null) {
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('product-modal-open');
     modal.querySelector('.product-close-btn').focus();
+    updateBackToTopButton();
 }
 
 function closeProductModal() {
@@ -632,6 +637,7 @@ function closeProductModal() {
     productModalId = null;
     productModalQty = 1;
     productModalTrigger = null;
+    updateBackToTopButton();
 }
 
 function changeProductModalQty(delta) {
@@ -760,6 +766,7 @@ function openCheckoutModal() {
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('checkout-modal-open');
     document.getElementById('checkoutName').focus();
+    updateBackToTopButton();
 }
 
 function closeCheckoutModal() {
@@ -771,6 +778,7 @@ function closeCheckoutModal() {
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('checkout-modal-open');
     resetCheckoutModalState();
+    updateBackToTopButton();
 }
 
 function validateCheckoutForm() {
@@ -909,12 +917,66 @@ function setupStickyBar() {
     const bar = document.getElementById('menuStickyBar');
     if (!bar) return;
 
-    const updateScrolled = () => {
+    const onScroll = () => {
         bar.classList.toggle('is-scrolled', window.scrollY > 8);
+        updateBackToTopButton();
     };
 
-    window.addEventListener('scroll', updateScrolled, { passive: true });
-    updateScrolled();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+}
+
+const BACK_TO_TOP_THRESHOLD = 300;
+
+function isOverlayOpen() {
+    return document.getElementById('cartOverlay')?.classList.contains('open')
+        || document.getElementById('checkoutModal')?.classList.contains('open')
+        || document.getElementById('productModal')?.classList.contains('open');
+}
+
+function updateBackToTopButton() {
+    const btn = document.getElementById('backToTopBtn');
+    if (!btn) return;
+    const show = window.scrollY > BACK_TO_TOP_THRESHOLD && !isOverlayOpen();
+    btn.classList.toggle('is-visible', show);
+    btn.hidden = !show;
+    positionBackToTopFab();
+}
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const DESKTOP_BREAKPOINT = 1025;
+
+function positionBackToTopFab() {
+    const btn = document.getElementById('backToTopBtn');
+    const menu = document.querySelector('.menu-content');
+    if (!btn) return;
+
+    btn.style.left = '';
+    btn.style.right = '';
+
+    if (window.innerWidth < DESKTOP_BREAKPOINT || !menu) {
+        return;
+    }
+
+    const rect = menu.getBoundingClientRect();
+    const inset = 20;
+
+    if (document.documentElement.dir === 'rtl') {
+        btn.style.left = `${rect.left + inset}px`;
+    } else {
+        btn.style.right = `${window.innerWidth - rect.right + inset}px`;
+    }
+}
+
+function setupBackToTop() {
+    const btn = document.getElementById('backToTopBtn');
+    if (!btn) return;
+    btn.addEventListener('click', scrollToTop);
+    window.addEventListener('resize', positionBackToTopFab, { passive: true });
+    updateBackToTopButton();
 }
 
 // ─── Init ────────────────────────────────────────────────────────────────────
@@ -927,5 +989,6 @@ document.addEventListener("DOMContentLoaded", () => {
     applyUIStrings();
     initBrandLogo();
     setupStickyBar();
+    setupBackToTop();
     loadMenu();
 });

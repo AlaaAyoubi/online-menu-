@@ -1420,3 +1420,45 @@ body.product-modal-open {
         gap: 10px;
     }
 }
+
+/* ==========================================
+   Back to Top FAB
+   ========================================== */
+
+.back-to-top-btn {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: var(--primary-red);
+    color: var(--surface-white);
+    box-shadow: 0 4px 16px rgba(255, 70, 70, 0.35);
+    cursor: pointer;
+    z-index: 600;
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease, right 0.2s ease, left 0.2s ease;
+}
+
+.back-to-top-btn i {
+    font-size: 14px;
+}
+
+.back-to-top-btn.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.back-to-top-btn[hidden] {
+    display: none;
+}
+
+[dir="rtl"] .back-to-top-btn {
+    right: auto;
+    left: 20px;
+}
