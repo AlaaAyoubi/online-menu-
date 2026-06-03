@@ -32,20 +32,34 @@
                 </div>
             </header>
 
+            <div class="menu-search" role="search">
+                <label class="menu-search-label" for="menuSearchInput">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span class="visually-hidden" data-i18n="searchLabel">Search menu</span>
+                </label>
+                <input type="search" id="menuSearchInput" class="menu-search-input"
+                       autocomplete="off" enterkeyhint="search"
+                       data-i18n-placeholder="searchPlaceholder">
+                <button type="button" id="menuSearchClear" class="menu-search-clear"
+                        data-i18n-aria="searchClear" aria-label="Clear search" hidden>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+
             <nav class="categories-nav">
-                <button class="cat-btn active" onclick="filterMenu('all', event)">
+                <button class="cat-btn active" data-category="all" onclick="filterMenu('all', event)">
                     <i class="fa-solid fa-border-all"></i> <span data-i18n="cat_all">All</span>
                 </button>
-                <button class="cat-btn" onclick="filterMenu('burgers', event)">
+                <button class="cat-btn" data-category="burgers" onclick="filterMenu('burgers', event)">
                     <i class="fa-solid fa-hamburger"></i> <span data-i18n="cat_burgers">Burgers</span>
                 </button>
-                <button class="cat-btn" onclick="filterMenu('pizza', event)">
+                <button class="cat-btn" data-category="pizza" onclick="filterMenu('pizza', event)">
                     <i class="fa-solid fa-pizza-slice"></i> <span data-i18n="cat_pizza">Pizza</span>
                 </button>
-                <button class="cat-btn" onclick="filterMenu('sides', event)">
+                <button class="cat-btn" data-category="sides" onclick="filterMenu('sides', event)">
                     <i class="fa-solid fa-bowl-food"></i> <span data-i18n="cat_sides">Sides</span>
                 </button>
-                <button class="cat-btn" onclick="filterMenu('drinks', event)">
+                <button class="cat-btn" data-category="drinks" onclick="filterMenu('drinks', event)">
                     <i class="fa-solid fa-glass-water"></i> <span data-i18n="cat_drinks">Drinks</span>
                 </button>
             </nav>

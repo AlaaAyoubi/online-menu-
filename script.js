@@ -2,6 +2,8 @@
 
 let ACTIVE_LANG = 'en';
 let activeCategory = 'all';
+let activeSearchQuery = '';
+let categoryBeforeSearch = 'all';
 
 const UI_STRINGS = {
     en: {
@@ -36,7 +38,11 @@ const UI_STRINGS = {
         buyNow: 'Buy Now',
         addToCart: 'Add to Cart',
         quantity: 'Quantity',
-        quickAdd: 'Add one to basket',
+        viewProduct: 'View item details',
+        searchLabel: 'Search menu',
+        searchPlaceholder: 'Search burgers, pizza…',
+        searchNoResults: 'No items match your search.',
+        searchClear: 'Clear search',
         items: 'items',
         item: 'item',
         loadError: 'Failed to load menu. Please try again.',
@@ -75,7 +81,11 @@ const UI_STRINGS = {
         buyNow: 'اطلب الآن',
         addToCart: 'أضف إلى السلة',
         quantity: 'الكمية',
-        quickAdd: 'أضف واحداً إلى السلة',
+        viewProduct: 'عرض تفاصيل الصنف',
+        searchLabel: 'بحث في القائمة',
+        searchPlaceholder: 'ابحث عن برغر، بيتزا…',
+        searchNoResults: 'لا توجد أصناف مطابقة لبحثك.',
+        searchClear: 'مسح البحث',
         items: 'أصناف',
         item: 'صنف',
         loadError: 'فشل تحميل القائمة. حاول مجدداً.',
@@ -96,6 +106,9 @@ function applyUIStrings() {
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
     });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
 }
 
 function switchLanguage(lang) {
@@ -105,7 +118,7 @@ function switchLanguage(lang) {
     html.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.getElementById('langLabel').textContent = lang === 'ar' ? 'EN' : 'AR';
     applyUIStrings();
-    loadMenu(activeCategory);
+    applyFiltersAndRender();
     updateBasketUI();
 }
 
@@ -274,7 +287,7 @@ function hideLoadingSkeleton() {
 async function loadMenu(category = 'all') {
     const cached = getCachedMenu(category);
     if (cached) {
-        renderMenuCards(cached);
+        applyFiltersAndRender();
         return;
     }
 
@@ -282,7 +295,7 @@ async function loadMenu(category = 'all') {
     try {
         const data = await mockFetch(category);
         writeMenuCache(category, data);
-        renderMenuCards(data);
+        applyFiltersAndRender();
     } catch (err) {
         const container = document.getElementById("menu-items-container");
         if (container) {
@@ -318,20 +331,144 @@ function renderMenuCards(items) {
                 </div>
                 <div class="card-footer">
                     <span class="price">$${item.price.toFixed(2)}</span>
-                    <button type="button" class="quick-add-btn icon-circle-btn" data-action="quick-add" data-id="${item.id}" aria-label="${t('quickAdd')}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                    <button type="button" class="quick-add-btn icon-circle-btn" data-id="${item.id}" aria-label="${t('viewProduct')}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 </div>
             </article>
         `;
     }).join('');
 }
 
+// ─── Search & Filter ─────────────────────────────────────────────────────────
+
+function normalizeSearchText(str) {
+    return str.trim().toLowerCase();
+}
+
+function itemMatchesSearch(item, query, lang) {
+    if (!query) return true;
+    const label = item.translations[lang] || item.translations.en;
+    return normalizeSearchText(label).includes(query);
+}
+
+function getFilteredMenuItems() {
+    const query = normalizeSearchText(activeSearchQuery);
+    let items = query
+        ? mockMenuData
+        : (activeCategory === 'all'
+            ? mockMenuData
+            : mockMenuData.filter(item => item.category === activeCategory));
+
+    if (query) {
+        items = items.filter(item => itemMatchesSearch(item, query, ACTIVE_LANG));
+    }
+    return items;
+}
+
+function setActiveCategoryTab(category) {
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+}
+
+function updateSearchClearButton() {
+    const clearBtn = document.getElementById('menuSearchClear');
+    const input = document.getElementById('menuSearchInput');
+    if (clearBtn && input) {
+        clearBtn.hidden = !input.value.trim();
+    }
+}
+
+function renderNoSearchResults() {
+    const container = document.getElementById('menu-items-container');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="no-search-results">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <p>${t('searchNoResults')}</p>
+        </div>`;
+}
+
+function applyFiltersAndRender() {
+    const items = getFilteredMenuItems();
+    const query = normalizeSearchText(activeSearchQuery);
+
+    if (items.length === 0 && query) {
+        renderNoSearchResults();
+        return;
+    }
+    renderMenuCards(items);
+}
+
+function clearSearch(restoreCategory = true) {
+    const input = document.getElementById('menuSearchInput');
+    if (input) input.value = '';
+    activeSearchQuery = '';
+    updateSearchClearButton();
+
+    if (restoreCategory) {
+        activeCategory = categoryBeforeSearch;
+        setActiveCategoryTab(categoryBeforeSearch);
+    }
+
+    applyFiltersAndRender();
+}
+
+function handleSearchInput() {
+    const input = document.getElementById('menuSearchInput');
+    if (!input) return;
+
+    const query = input.value;
+    const normalized = normalizeSearchText(query);
+    const wasSearching = normalizeSearchText(activeSearchQuery).length > 0;
+
+    if (normalized && !wasSearching) {
+        categoryBeforeSearch = activeCategory;
+    }
+
+    activeSearchQuery = query;
+    updateSearchClearButton();
+
+    if (normalized) {
+        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+    } else {
+        activeCategory = categoryBeforeSearch;
+        setActiveCategoryTab(categoryBeforeSearch);
+    }
+
+    applyFiltersAndRender();
+}
+
+let searchDebounceTimer = null;
+
+function setupSearch() {
+    const input = document.getElementById('menuSearchInput');
+    const clearBtn = document.getElementById('menuSearchClear');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(handleSearchInput, 250);
+    });
+
+    clearBtn?.addEventListener('click', () => clearSearch(true));
+
+    input.addEventListener('search', () => {
+        if (!input.value) clearSearch(true);
+    });
+}
+
 function filterMenu(category, event) {
-    const buttons = document.querySelectorAll('.cat-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
+    const input = document.getElementById('menuSearchInput');
+    if (input) input.value = '';
+    activeSearchQuery = '';
+    updateSearchClearButton();
+
+    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
     if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
     }
     activeCategory = category;
+    categoryBeforeSearch = category;
     loadMenu(category);
 }
 
@@ -723,17 +860,11 @@ function setupCheckout() {
 
 function setupEventDelegation() {
     document.getElementById('menu-items-container').addEventListener('click', (e) => {
-        const quickAdd = e.target.closest('[data-action="quick-add"]');
-        if (quickAdd) {
-            e.stopPropagation();
-            addToBasket(parseInt(quickAdd.dataset.id, 10), 1);
-            return;
-        }
-
         const card = e.target.closest('[data-action="open-product"]');
-        if (card) {
-            openProductModal(parseInt(card.dataset.id, 10), card);
-        }
+        if (!card) return;
+
+        const trigger = e.target.closest('.quick-add-btn') || card;
+        openProductModal(parseInt(card.dataset.id, 10), trigger);
     });
 
     document.getElementById('cart-items-wrapper').addEventListener('click', (e) => {
@@ -750,6 +881,7 @@ function setupEventDelegation() {
 
 document.addEventListener("DOMContentLoaded", () => {
     setupEventDelegation();
+    setupSearch();
     setupProductModal();
     setupCheckout();
     applyUIStrings();
