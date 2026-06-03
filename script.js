@@ -43,6 +43,10 @@ const UI_STRINGS = {
         searchPlaceholder: 'Search burgers, pizza…',
         searchNoResults: 'No items match your search.',
         searchClear: 'Clear search',
+        restaurantName: 'Foodle',
+        footerContact: 'Questions? Call +966 5X XXX XXXX',
+        footerCopyright: '© 2026 Foodle. All rights reserved.',
+        footerPoweredBy: 'Powered by',
         items: 'items',
         item: 'item',
         loadError: 'Failed to load menu. Please try again.',
@@ -86,6 +90,10 @@ const UI_STRINGS = {
         searchPlaceholder: 'ابحث عن برغر، بيتزا…',
         searchNoResults: 'لا توجد أصناف مطابقة لبحثك.',
         searchClear: 'مسح البحث',
+        restaurantName: 'فودل',
+        footerContact: 'استفسارات؟ اتصل على +966 5X XXX XXXX',
+        footerCopyright: '© 2026 فودل. جميع الحقوق محفوظة.',
+        footerPoweredBy: 'مدعوم من',
         items: 'أصناف',
         item: 'صنف',
         loadError: 'فشل تحميل القائمة. حاول مجدداً.',
@@ -118,6 +126,7 @@ function switchLanguage(lang) {
     html.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.getElementById('langLabel').textContent = lang === 'ar' ? 'EN' : 'AR';
     applyUIStrings();
+    initBrandLogo();
     applyFiltersAndRender();
     updateBasketUI();
 }
@@ -877,6 +886,37 @@ function setupEventDelegation() {
     });
 }
 
+// ─── Brand Logo & Sticky Bar ─────────────────────────────────────────────────
+
+function showBrandWordmark() {
+    const img = document.getElementById('brandLogo');
+    const wordmark = document.getElementById('brandWordmark');
+    if (img) img.hidden = true;
+    if (wordmark) wordmark.hidden = false;
+}
+
+function initBrandLogo() {
+    const img = document.getElementById('brandLogo');
+    if (!img) return;
+
+    img.alt = t('restaurantName');
+    if (img.complete && img.naturalWidth === 0) {
+        showBrandWordmark();
+    }
+}
+
+function setupStickyBar() {
+    const bar = document.getElementById('menuStickyBar');
+    if (!bar) return;
+
+    const updateScrolled = () => {
+        bar.classList.toggle('is-scrolled', window.scrollY > 8);
+    };
+
+    window.addEventListener('scroll', updateScrolled, { passive: true });
+    updateScrolled();
+}
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -885,5 +925,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupProductModal();
     setupCheckout();
     applyUIStrings();
+    initBrandLogo();
+    setupStickyBar();
     loadMenu();
 });

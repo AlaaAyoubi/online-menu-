@@ -17,6 +17,13 @@
         <main class="menu-content">
             <header class="menu-header">
                 <div class="brand">
+                    <div class="brand-logo">
+                        <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
+                             onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
+                        <div class="brand-wordmark" id="brandWordmark" hidden>
+                            <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
+                        </div>
+                    </div>
                     <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
                     <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
                 </div>
@@ -32,6 +39,7 @@
                 </div>
             </header>
 
+            <div class="menu-sticky-bar" id="menuStickyBar">
             <div class="menu-search" role="search">
                 <label class="menu-search-label" for="menuSearchInput">
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -63,9 +71,19 @@
                     <i class="fa-solid fa-glass-water"></i> <span data-i18n="cat_drinks">Drinks</span>
                 </button>
             </nav>
+            </div>
 
             <section class="items-grid" id="menu-items-container">
                 </section>
+
+            <footer class="site-footer">
+                <p class="site-footer-contact" data-i18n="footerContact">Questions? Call +966 5X XXX XXXX</p>
+                <p class="site-footer-copy" data-i18n="footerCopyright">© 2026 Foodle. All rights reserved.</p>
+                <p class="site-footer-powered">
+                    <span data-i18n="footerPoweredBy">Powered by</span>
+                    <strong>Alaa Ayoubi</strong>
+                </p>
+            </footer>
         </main>
 
         <aside class="cart-sidebar" id="cartSidebar">
