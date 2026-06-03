@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodle Premium E-Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="menu-app-container">
+        
+        <main class="menu-content">
+            <header class="menu-header">
+                <div class="brand">
+                    <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
+                    <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="lang-toggle-btn" id="langToggleBtn" onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')" aria-label="Switch Language">
+                        <span id="langLabel">AR</span>
+                    </button>
+                    <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                        <span class="header-cart-badge" id="header-cart-count">0</span>
+                    </button>
+                </div>
+            </header>
+
+            <nav class="categories-nav">
+                <button class="cat-btn active" onclick="filterMenu('all', event)">
+                    <i class="fa-solid fa-border-all"></i> <span data-i18n="cat_all">All</span>
+                </button>
+                <button class="cat-btn" onclick="filterMenu('burgers', event)">
+                    <i class="fa-solid fa-hamburger"></i> <span data-i18n="cat_burgers">Burgers</span>
+                </button>
+                <button class="cat-btn" onclick="filterMenu('pizza', event)">
+                    <i class="fa-solid fa-pizza-slice"></i> <span data-i18n="cat_pizza">Pizza</span>
+                </button>
+                <button class="cat-btn" onclick="filterMenu('sides', event)">
+                    <i class="fa-solid fa-bowl-food"></i> <span data-i18n="cat_sides">Sides</span>
+                </button>
+                <button class="cat-btn" onclick="filterMenu('drinks', event)">
+                    <i class="fa-solid fa-glass-water"></i> <span data-i18n="cat_drinks">Drinks</span>
+                </button>
+            </nav>
+
+            <section class="items-grid" id="menu-items-container">
+                </section>
+        </main>
+
+        <aside class="cart-sidebar" id="cartSidebar">
+            <div class="cart-header">
+                <div class="cart-title">
+                    <h3><i class="fa-solid fa-basket-shopping"></i> <span data-i18n="myBasket">My Basket</span></h3>
+                    <span class="items-count" id="cart-count">0 items</span>
+                </div>
+                <div class="cart-header-actions">
+                    <button class="clear-basket-btn" onclick="clearBasket()" title="Clear All Items">
+                        <i class="fa-solid fa-trash-arrow-up"></i> <span data-i18n="clear">Clear</span>
+                    </button>
+                    <button class="close-cart-btn" onclick="toggleCartPanel(false)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cart-body" id="cart-items-wrapper">
+                <div class="empty-state">
+                    <i class="fa-solid fa-cookie-bite"></i>
+                    <p>Your basket is empty.<br>Choose something delicious!</p>
+                </div>
+            </div>
+
+            <div class="cart-footer">
+                <div class="summary-row">
+                    <span data-i18n="subtotal">Subtotal</span>
+                    <span id="subtotal-price">$0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span data-i18n="totalAmount">Total Amount</span>
+                    <span id="total-price">$0.00</span>
+                </div>
+                <button class="order-now-btn" id="orderNowBtn" type="button">
+                    <i class="fa-solid fa-bag-shopping"></i> <span data-i18n="orderNow">Order Now</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="cart-overlay" id="cartOverlay" onclick="toggleCartPanel(false)"></div>
+
+    </div>
+
+    <div class="checkout-overlay" id="checkoutOverlay" data-action="close-checkout" aria-hidden="true"></div>
+    <div class="checkout-modal" id="checkoutModal" role="dialog" aria-labelledby="checkoutTitle" aria-hidden="true">
+        <div class="checkout-modal-inner">
+            <header class="checkout-header">
+                <h2 id="checkoutTitle" data-i18n="checkoutTitle">Complete Your Order</h2>
+                <button type="button" class="checkout-close-btn" data-action="close-checkout" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+
+            <div class="checkout-body">
+                <h3 class="checkout-summary-title" data-i18n="checkoutSummary">Order Summary</h3>
+                <div id="checkoutSummary" class="checkout-summary-list"></div>
+
+                <form id="checkoutForm" class="checkout-form" novalidate>
+                    <label class="checkout-field">
+                        <span data-i18n="checkoutName">Full Name</span>
+                        <input type="text" id="checkoutName" name="name" autocomplete="name" required>
+                    </label>
+                    <label class="checkout-field">
+                        <span data-i18n="checkoutPhone">Phone Number</span>
+                        <input type="tel" id="checkoutPhone" name="phone" autocomplete="tel" required>
+                    </label>
+                    <label class="checkout-field">
+                        <span data-i18n="checkoutNotes">Notes (optional)</span>
+                        <textarea id="checkoutNotes" name="notes" rows="2" data-i18n-placeholder="checkoutNotesPlaceholder"></textarea>
+                    </label>
+                </form>
+
+                <p id="checkoutError" class="checkout-error" hidden></p>
+                <p id="checkoutSuccess" class="checkout-success" hidden data-i18n="checkoutSuccess">Order placed successfully! Thank you.</p>
+            </div>
+
+            <footer class="checkout-footer">
+                <button type="button" class="checkout-cancel-btn" data-action="close-checkout">
+                    <span data-i18n="checkoutCancel">Cancel</span>
+                </button>
+                <button type="button" class="checkout-submit-btn" id="checkoutSubmitBtn" data-action="submit-order">
+                    <span data-i18n="checkoutSubmit">Submit Order</span>
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
