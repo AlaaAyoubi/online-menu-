@@ -34,6 +34,9 @@ const UI_STRINGS = {
         checkoutSuccess: 'Order placed successfully! Thank you.',
         checkoutError: 'Could not submit your order. Please try again.',
         buyNow: 'Buy Now',
+        addToCart: 'Add to Cart',
+        quantity: 'Quantity',
+        quickAdd: 'Add one to basket',
         items: 'items',
         item: 'item',
         loadError: 'Failed to load menu. Please try again.',
@@ -70,6 +73,9 @@ const UI_STRINGS = {
         checkoutSuccess: 'تم تقديم الطلب بنجاح! شكراً لك.',
         checkoutError: 'تعذر إرسال الطلب. حاول مجدداً.',
         buyNow: 'اطلب الآن',
+        addToCart: 'أضف إلى السلة',
+        quantity: 'الكمية',
+        quickAdd: 'أضف واحداً إلى السلة',
         items: 'أصناف',
         item: 'صنف',
         loadError: 'فشل تحميل القائمة. حاول مجدداً.',
@@ -188,6 +194,9 @@ const mockMenuData = [
 ];
 
 let basket = [];
+let productModalId = null;
+let productModalQty = 1;
+let productModalTrigger = null;
 
 // ─── API Mock Layer ──────────────────────────────────────────────────────────
 // When the real backend is ready, replace this entire function with:
@@ -299,7 +308,7 @@ function renderMenuCards(items) {
         const label = item.translations[ACTIVE_LANG] || item.translations.en;
         const stars = Array(item.rating).fill('<i class="fa-solid fa-star"></i>').join('');
         return `
-            <article class="item-card">
+            <article class="item-card" data-action="open-product" data-id="${item.id}">
                 <div class="img-container">
                     <img src="${item.image}" alt="${label}" loading="lazy">
                 </div>
@@ -309,7 +318,7 @@ function renderMenuCards(items) {
                 </div>
                 <div class="card-footer">
                     <span class="price">$${item.price.toFixed(2)}</span>
-                    <button class="buy-now-btn" data-action="add-to-basket" data-id="${item.id}">${t('buyNow')}</button>
+                    <button type="button" class="quick-add-btn icon-circle-btn" data-action="quick-add" data-id="${item.id}" aria-label="${t('quickAdd')}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 </div>
             </article>
         `;
@@ -342,16 +351,17 @@ function toggleCartPanel(isOpen) {
 
 // ─── Basket Logic ────────────────────────────────────────────────────────────
 
-function addToBasket(id) {
+function addToBasket(id, qty = 1) {
     const product = mockMenuData.find(p => p.id === id);
+    if (!product) return;
     const existing = basket.find(p => p.id === id);
     if (existing) {
-        existing.quantity++;
+        existing.quantity += qty;
     } else {
-        basket.push({ ...product, quantity: 1 });
+        basket.push({ ...product, quantity: qty });
     }
     updateBasketUI();
-    if (window.innerWidth <= 1024 && basket.length === 1) {
+    if (window.innerWidth <= 1024 && basket.length === 1 && existing === undefined) {
         toggleCartPanel(true);
     }
 }
@@ -411,8 +421,8 @@ function updateBasketUI() {
                 <span>$${item.price.toFixed(2)} × ${item.quantity}</span>
             </div>
             <div class="qty-controls">
-                <button class="qty-btn" data-action="qty-decrease" data-id="${item.id}">-</button>
-                <button class="qty-btn" data-action="qty-increase" data-id="${item.id}">+</button>
+                <button class="qty-btn icon-circle-btn" data-action="qty-decrease" data-id="${item.id}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                <button class="qty-btn icon-circle-btn" data-action="qty-increase" data-id="${item.id}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 <button class="delete-item-btn" data-action="remove-item" data-id="${item.id}">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -423,6 +433,90 @@ function updateBasketUI() {
     const totalAmount = basket.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     subtotalText.innerText = `$${totalAmount.toFixed(2)}`;
     totalText.innerText = `$${totalAmount.toFixed(2)}`;
+}
+
+// ─── Product Detail Modal ────────────────────────────────────────────────────
+
+function updateProductModalQtyDisplay() {
+    const qtyEl = document.getElementById('productModalQty');
+    if (qtyEl) qtyEl.textContent = productModalQty;
+}
+
+function openProductModal(id, triggerEl = null) {
+    const product = mockMenuData.find(p => p.id === id);
+    if (!product) return;
+
+    productModalId = id;
+    productModalQty = 1;
+    productModalTrigger = triggerEl;
+
+    const label = product.translations[ACTIVE_LANG] || product.translations.en;
+    const stars = Array(product.rating).fill('<i class="fa-solid fa-star"></i>').join('');
+
+    document.getElementById('productModalImage').src = product.image;
+    document.getElementById('productModalImage').alt = label;
+    document.getElementById('productModalRating').innerHTML = stars;
+    document.getElementById('productModalTitle').textContent = label;
+    document.getElementById('productModalPrice').textContent = `$${product.price.toFixed(2)}`;
+    updateProductModalQtyDisplay();
+    applyUIStrings();
+
+    const overlay = document.getElementById('productOverlay');
+    const modal = document.getElementById('productModal');
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('product-modal-open');
+    modal.querySelector('.product-close-btn').focus();
+}
+
+function closeProductModal() {
+    const overlay = document.getElementById('productOverlay');
+    const modal = document.getElementById('productModal');
+    overlay.classList.remove('open');
+    modal.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('product-modal-open');
+
+    if (productModalTrigger && typeof productModalTrigger.focus === 'function') {
+        productModalTrigger.focus();
+    }
+    productModalId = null;
+    productModalQty = 1;
+    productModalTrigger = null;
+}
+
+function changeProductModalQty(delta) {
+    productModalQty = Math.max(1, productModalQty + delta);
+    updateProductModalQtyDisplay();
+}
+
+function addProductModalToBasket() {
+    if (productModalId == null) return;
+    addToBasket(productModalId, productModalQty);
+    closeProductModal();
+}
+
+function setupProductModal() {
+    document.addEventListener('click', (e) => {
+        const actionEl = e.target.closest('[data-action]');
+        if (!actionEl) return;
+
+        const modal = document.getElementById('productModal');
+        if (!modal.classList.contains('open')) return;
+
+        const action = actionEl.dataset.action;
+        if (action === 'close-product') {
+            if (e.target.id === 'productOverlay' || actionEl.closest('#productModal')) {
+                closeProductModal();
+            }
+        }
+        if (action === 'product-qty-increase') changeProductModalQty(1);
+        if (action === 'product-qty-decrease') changeProductModalQty(-1);
+        if (action === 'product-add-to-cart') addProductModalToBasket();
+    });
 }
 
 // ─── Checkout / Order API ────────────────────────────────────────────────────
@@ -614,7 +708,12 @@ function setupCheckout() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && document.getElementById('checkoutModal').classList.contains('open')) {
+        if (e.key !== 'Escape') return;
+        if (document.getElementById('productModal').classList.contains('open')) {
+            closeProductModal();
+            return;
+        }
+        if (document.getElementById('checkoutModal').classList.contains('open')) {
             closeCheckoutModal();
         }
     });
@@ -624,10 +723,16 @@ function setupCheckout() {
 
 function setupEventDelegation() {
     document.getElementById('menu-items-container').addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-action]');
-        if (!btn) return;
-        if (btn.dataset.action === 'add-to-basket') {
-            addToBasket(parseInt(btn.dataset.id, 10));
+        const quickAdd = e.target.closest('[data-action="quick-add"]');
+        if (quickAdd) {
+            e.stopPropagation();
+            addToBasket(parseInt(quickAdd.dataset.id, 10), 1);
+            return;
+        }
+
+        const card = e.target.closest('[data-action="open-product"]');
+        if (card) {
+            openProductModal(parseInt(card.dataset.id, 10), card);
         }
     });
 
@@ -645,6 +750,7 @@ function setupEventDelegation() {
 
 document.addEventListener("DOMContentLoaded", () => {
     setupEventDelegation();
+    setupProductModal();
     setupCheckout();
     applyUIStrings();
     loadMenu();
