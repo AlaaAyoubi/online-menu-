@@ -52,7 +52,14 @@ const UI_STRINGS = {
         item: 'item',
         loadError: 'Failed to load menu. Please try again.',
         clearConfirm: 'Are you sure you want to empty your basket?',
-        emptyCartAlert: 'Please add items to your basket before checking out!'
+        emptyCartAlert: 'Please add items to your basket before checking out!',
+        modifierOptional: 'Optional',
+        modifierRequired: 'Required',
+        modifierChooseOne: 'Choose 1',
+        modifierChooseUpTo: 'Optional, up to {n}',
+        modifierMinError: 'Please select at least {n} option(s) for "{name}".',
+        modifierMaxError: 'You can select at most {n} option(s) for "{name}".',
+        modifierFree: 'Free'
     },
     ar: {
         menuTitle: 'قائمتنا ',
@@ -100,7 +107,14 @@ const UI_STRINGS = {
         item: 'صنف',
         loadError: 'فشل تحميل القائمة. حاول مجدداً.',
         clearConfirm: 'هل أنت متأكد من تفريغ السلة؟',
-        emptyCartAlert: 'يرجى إضافة أصناف قبل تقديم الطلب!'
+        emptyCartAlert: 'يرجى إضافة أصناف قبل تقديم الطلب!',
+        modifierOptional: 'اختياري',
+        modifierRequired: 'مطلوب',
+        modifierChooseOne: 'اختر واحداً',
+        modifierChooseUpTo: 'اختياري، حتى {n}',
+        modifierMinError: 'يرجى اختيار {n} على الأقل من "{name}".',
+        modifierMaxError: 'يمكنك اختيار {n} كحد أقصى من "{name}".',
+        modifierFree: 'مجاني'
     }
 };
 
@@ -132,6 +146,13 @@ function switchLanguage(lang) {
     applyFiltersAndRender();
     updateBasketUI();
     positionBackToTopFab();
+    if (productModalId != null) {
+        const product = mockMenuData.find(p => p.id === productModalId);
+        if (product) {
+            renderProductModalModifiers(product, true);
+            updateProductModalPriceDisplay();
+        }
+    }
 }
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -142,19 +163,22 @@ const mockMenuData = [
         id: 1,
         translations: { en: "Classic Chicken Burger", ar: "برغر دجاج كلاسيك" },
         category: "burgers", price: 5.00, rating: 5,
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400",
+        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
     },
     {
         id: 2,
         translations: { en: "Crispy Zinger Burger", ar: "برغر زينجر مقرمش" },
         category: "burgers", price: 5.50, rating: 5,
-        image: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?q=80&w=400",
+        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
     },
     {
         id: 3,
         translations: { en: "Smoked BBQ Beef Burger", ar: "برغر لحم بقر مدخن بالبي بي كيو" },
         category: "burgers", price: 6.80, rating: 4,
-        image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400",
+        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
     },
 
     // PIZZA
@@ -162,19 +186,22 @@ const mockMenuData = [
         id: 4,
         translations: { en: "Classic Chicken Pizza", ar: "بيتزا دجاج كلاسيك" },
         category: "pizza", price: 7.20, rating: 4,
-        image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400",
+        modifierTemplateIds: ['template_pizza_toppings']
     },
     {
         id: 5,
         translations: { en: "Pepperoni Passion Pizza", ar: "بيتزا بيبيروني فاخرة" },
         category: "pizza", price: 8.50, rating: 5,
-        image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=400",
+        modifierTemplateIds: ['template_pizza_toppings']
     },
     {
         id: 6,
         translations: { en: "Margherita Supreme", ar: "مارغريتا سوبريم" },
         category: "pizza", price: 6.99, rating: 5,
-        image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?q=80&w=400",
+        modifierTemplateIds: ['template_pizza_toppings']
     },
 
     // SIDES
@@ -202,13 +229,15 @@ const mockMenuData = [
         id: 10,
         translations: { en: "Coca Cola Ice", ar: "كوكا كولا مثلجة" },
         category: "drinks", price: 1.50, rating: 5,
-        image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400",
+        modifierTemplateIds: ['template_drink_size']
     },
     {
         id: 11,
         translations: { en: "Strawberry Milkshake", ar: "ميلك شيك فراولة" },
         category: "drinks", price: 3.50, rating: 5,
-        image: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=400"
+        image: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=400",
+        modifierTemplateIds: ['template_drink_size']
     },
     {
         id: 12,
@@ -218,10 +247,62 @@ const mockMenuData = [
     }
 ];
 
+const mockModifierTemplates = {
+    template_burger_extras: {
+        id: 'template_burger_extras',
+        translations: { en: 'Extra toppings', ar: 'إضافات' },
+        multiSelect: true,
+        minCount: 0,
+        maxCount: 3,
+        options: [
+            { id: 'mod_cheese', materialId: 1001, translations: { en: 'Extra Cheese', ar: 'جبنة إضافية' }, price: 0.50 },
+            { id: 'mod_bacon', materialId: 1002, translations: { en: 'Bacon', ar: 'لحم مقدد' }, price: 1.00 },
+            { id: 'mod_egg', materialId: 1003, translations: { en: 'Fried Egg', ar: 'بيض مقلي' }, price: 0.75 }
+        ]
+    },
+    template_burger_sauce: {
+        id: 'template_burger_sauce',
+        translations: { en: 'Choose sauce', ar: 'اختر الصلصة' },
+        multiSelect: false,
+        minCount: 1,
+        maxCount: 1,
+        options: [
+            { id: 'mod_ketchup', materialId: 2001, translations: { en: 'Ketchup', ar: 'كاتشب' }, price: 0 },
+            { id: 'mod_mayo', materialId: 2002, translations: { en: 'Mayo', ar: 'مايونيز' }, price: 0 },
+            { id: 'mod_bbq', materialId: 2003, translations: { en: 'BBQ Sauce', ar: 'صلصة باربكيو' }, price: 0.25 }
+        ]
+    },
+    template_pizza_toppings: {
+        id: 'template_pizza_toppings',
+        translations: { en: 'Extra toppings', ar: 'إضافات' },
+        multiSelect: true,
+        minCount: 0,
+        maxCount: 5,
+        options: [
+            { id: 'mod_pepperoni', materialId: 3001, translations: { en: 'Pepperoni', ar: 'بيبيروني' }, price: 1.00 },
+            { id: 'mod_mushrooms', materialId: 3002, translations: { en: 'Mushrooms', ar: 'فطر' }, price: 0.75 },
+            { id: 'mod_olives', materialId: 3003, translations: { en: 'Olives', ar: 'زيتون' }, price: 0.50 }
+        ]
+    },
+    template_drink_size: {
+        id: 'template_drink_size',
+        translations: { en: 'Size', ar: 'الحجم' },
+        multiSelect: false,
+        minCount: 1,
+        maxCount: 1,
+        options: [
+            { id: 'mod_small', materialId: 4001, translations: { en: 'Small', ar: 'صغير' }, price: 0 },
+            { id: 'mod_medium', materialId: 4002, translations: { en: 'Medium', ar: 'وسط' }, price: 0.50 },
+            { id: 'mod_large', materialId: 4003, translations: { en: 'Large', ar: 'كبير' }, price: 1.00 }
+        ]
+    }
+};
+
 let basket = [];
 let productModalId = null;
 let productModalQty = 1;
 let productModalTrigger = null;
+let productModalSelections = {};
 
 // ─── API Mock Layer ──────────────────────────────────────────────────────────
 // When the real backend is ready, replace this entire function with:
@@ -239,7 +320,7 @@ function mockFetch(category = 'all') {
 // ─── sessionStorage Cache ────────────────────────────────────────────────────
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MENU_CACHE_VERSION = 2; // bump when mockMenuData changes (invalidates stale sessionStorage)
+const MENU_CACHE_VERSION = 3; // bump when mockMenuData changes (invalidates stale sessionStorage)
 
 function getMenuCacheKey(category) {
     return `menu_cache_v${MENU_CACHE_VERSION}_${category}`;
@@ -499,35 +580,270 @@ function toggleCartPanel(isOpen) {
     updateBackToTopButton();
 }
 
+// ─── Modifier Templates ──────────────────────────────────────────────────────
+
+function getTemplatesForProduct(product) {
+    const ids = product.modifierTemplateIds || [];
+    return ids.map(id => mockModifierTemplates[id]).filter(Boolean);
+}
+
+function getModifierLabel(option) {
+    return option.translations[ACTIVE_LANG] || option.translations.en;
+}
+
+function getTemplateLabel(template) {
+    return template.translations[ACTIVE_LANG] || template.translations.en;
+}
+
+function formatModifierOptionPrice(price) {
+    if (price === 0) return t('modifierFree');
+    return `+$${price.toFixed(2)}`;
+}
+
+function getModifierHint(template) {
+    if (!template.multiSelect && template.minCount >= 1) {
+        return t('modifierChooseOne');
+    }
+    if (template.multiSelect && template.minCount === 0 && template.maxCount > 0) {
+        return t('modifierChooseUpTo').replace('{n}', template.maxCount);
+    }
+    if (template.multiSelect && template.minCount === 0 && template.maxCount === -1) {
+        return t('modifierOptional');
+    }
+    if (template.minCount > 0) {
+        return t('modifierRequired');
+    }
+    return t('modifierOptional');
+}
+
+function initProductModalSelections(product) {
+    productModalSelections = {};
+    getTemplatesForProduct(product).forEach(template => {
+        productModalSelections[template.id] = new Set();
+    });
+}
+
+function getSelectedCountForTemplate(templateId) {
+    return productModalSelections[templateId]?.size || 0;
+}
+
+function getSelectedModifiers(product) {
+    const selected = [];
+    getTemplatesForProduct(product).forEach(template => {
+        const optionIds = productModalSelections[template.id] || new Set();
+        optionIds.forEach(optionId => {
+            const option = template.options.find(o => o.id === optionId);
+            if (!option) return;
+            selected.push({
+                templateId: template.id,
+                modifierId: option.id,
+                materialId: option.materialId,
+                price: option.price,
+                label: getModifierLabel(option)
+            });
+        });
+    });
+    return selected;
+}
+
+function computeUnitPrice(product, selectedModifiers) {
+    const mods = selectedModifiers ?? getSelectedModifiers(product);
+    const modifierTotal = mods.reduce((sum, m) => sum + m.price, 0);
+    return product.price + modifierTotal;
+}
+
+function buildLineKey(productId, selectedModifiers) {
+    const modIds = selectedModifiers.map(m => m.modifierId).sort().join(',');
+    return `${productId}|${modIds}`;
+}
+
+function formatModifiersSummary(selectedModifiers) {
+    if (!selectedModifiers?.length) return '';
+    return selectedModifiers.map(m => m.label).join(', ');
+}
+
+function clearModifierError() {
+    const errorEl = document.getElementById('productModalModifierError');
+    if (errorEl) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+    }
+}
+
+function showModifierError(message) {
+    const errorEl = document.getElementById('productModalModifierError');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+    }
+}
+
+function validateModifierSelection(product) {
+    for (const template of getTemplatesForProduct(product)) {
+        const count = getSelectedCountForTemplate(template.id);
+        const name = getTemplateLabel(template);
+
+        if (template.minCount > 0 && count < template.minCount) {
+            return {
+                valid: false,
+                error: t('modifierMinError').replace('{n}', template.minCount).replace('{name}', name)
+            };
+        }
+        if (template.maxCount !== -1 && count > template.maxCount) {
+            return {
+                valid: false,
+                error: t('modifierMaxError').replace('{n}', template.maxCount).replace('{name}', name)
+            };
+        }
+    }
+    return { valid: true, error: '' };
+}
+
+function renderProductModalModifiers(product, preserveSelections = false) {
+    const container = document.getElementById('productModalModifiers');
+    if (!container) return;
+
+    const templates = getTemplatesForProduct(product);
+    if (templates.length === 0) {
+        container.innerHTML = '';
+        container.hidden = true;
+        return;
+    }
+
+    container.hidden = false;
+    if (!preserveSelections) {
+        initProductModalSelections(product);
+    }
+    clearModifierError();
+
+    container.innerHTML = templates.map(template => {
+        const groupTitle = getTemplateLabel(template);
+        const hint = getModifierHint(template);
+        const inputType = template.multiSelect ? 'checkbox' : 'radio';
+        const inputName = template.multiSelect ? '' : `modifier-${template.id}`;
+
+        const optionsHtml = template.options.map(option => {
+            const label = getModifierLabel(option);
+            const priceLabel = formatModifierOptionPrice(option.price);
+            return `
+                <label class="modifier-option">
+                    <input type="${inputType}"
+                           name="${inputName}"
+                           data-template-id="${template.id}"
+                           data-option-id="${option.id}">
+                    <span class="modifier-option-label">${label}</span>
+                    <span class="modifier-option-price">${priceLabel}</span>
+                </label>`;
+        }).join('');
+
+        return `
+            <fieldset class="modifier-group">
+                <legend class="modifier-group-title">${groupTitle}</legend>
+                <p class="modifier-hint">${hint}</p>
+                <div class="modifier-options">${optionsHtml}</div>
+            </fieldset>`;
+    }).join('');
+
+    container.querySelectorAll('input[data-template-id]').forEach(input => {
+        const templateId = input.dataset.templateId;
+        const optionId = input.dataset.optionId;
+        input.checked = productModalSelections[templateId]?.has(optionId) || false;
+    });
+}
+
+function syncSelectionFromInput(input) {
+    const templateId = input.dataset.templateId;
+    const optionId = input.dataset.optionId;
+    const template = mockModifierTemplates[templateId];
+    if (!template) return;
+
+    if (!productModalSelections[templateId]) {
+        productModalSelections[templateId] = new Set();
+    }
+
+    if (input.type === 'radio') {
+        productModalSelections[templateId] = input.checked ? new Set([optionId]) : new Set();
+    } else if (input.checked) {
+        const set = productModalSelections[templateId];
+        if (template.maxCount !== -1 && set.size >= template.maxCount) {
+            input.checked = false;
+            const name = getTemplateLabel(template);
+            showModifierError(t('modifierMaxError').replace('{n}', template.maxCount).replace('{name}', name));
+            return;
+        }
+        set.add(optionId);
+    } else {
+        productModalSelections[templateId].delete(optionId);
+    }
+
+    clearModifierError();
+    updateProductModalPriceDisplay();
+}
+
+function updateProductModalPriceDisplay() {
+    const product = mockMenuData.find(p => p.id === productModalId);
+    if (!product) return;
+
+    const unitPrice = computeUnitPrice(product);
+    const total = unitPrice * productModalQty;
+    const priceEl = document.getElementById('productModalPrice');
+    const addPriceEl = document.getElementById('productModalAddPrice');
+
+    if (priceEl) {
+        priceEl.textContent = `$${product.price.toFixed(2)}`;
+    }
+    if (addPriceEl) {
+        addPriceEl.textContent = ` · $${total.toFixed(2)}`;
+    }
+}
+
 // ─── Basket Logic ────────────────────────────────────────────────────────────
 
-function addToBasket(id, qty = 1) {
-    const product = mockMenuData.find(p => p.id === id);
+function addToBasket(productId, qty = 1, selectedModifiers = []) {
+    const product = mockMenuData.find(p => p.id === productId);
     if (!product) return;
-    const existing = basket.find(p => p.id === id);
+
+    const unitPrice = computeUnitPrice(product, selectedModifiers);
+    const lineKey = buildLineKey(productId, selectedModifiers);
+    const existing = basket.find(item => item.lineKey === lineKey);
+
     if (existing) {
         existing.quantity += qty;
     } else {
-        basket.push({ ...product, quantity: qty });
+        basket.push({
+            lineKey,
+            productId: product.id,
+            id: product.id,
+            basePrice: product.price,
+            unitPrice,
+            price: unitPrice,
+            quantity: qty,
+            translations: product.translations,
+            image: product.image,
+            category: product.category,
+            rating: product.rating,
+            selectedModifiers: selectedModifiers.map(m => ({ ...m }))
+        });
     }
+
     updateBasketUI();
     if (window.innerWidth <= 1024 && basket.length === 1 && existing === undefined) {
         toggleCartPanel(true);
     }
 }
 
-function changeQuantity(id, amount) {
-    const item = basket.find(p => p.id === id);
+function changeQuantity(lineKey, amount) {
+    const item = basket.find(p => p.lineKey === lineKey);
     if (!item) return;
     item.quantity += amount;
     if (item.quantity <= 0) {
-        basket = basket.filter(p => p.id !== id);
+        basket = basket.filter(p => p.lineKey !== lineKey);
     }
     updateBasketUI();
 }
 
-function removeFromBasket(id) {
-    basket = basket.filter(p => p.id !== id);
+function removeFromBasket(lineKey) {
+    basket = basket.filter(p => p.lineKey !== lineKey);
     updateBasketUI();
 }
 
@@ -564,16 +880,21 @@ function updateBasketUI() {
 
     wrapper.innerHTML = basket.map(item => {
         const label = item.translations[ACTIVE_LANG] || item.translations.en;
+        const modSummary = formatModifiersSummary(item.selectedModifiers);
+        const modLine = modSummary
+            ? `<span class="cart-row-modifiers">+ ${modSummary}</span>`
+            : '';
         return `
         <div class="cart-row">
             <div class="cart-row-details">
                 <strong>${label}</strong>
+                ${modLine}
                 <span>$${item.price.toFixed(2)} × ${item.quantity}</span>
             </div>
             <div class="qty-controls">
-                <button class="qty-btn icon-circle-btn" data-action="qty-decrease" data-id="${item.id}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
-                <button class="qty-btn icon-circle-btn" data-action="qty-increase" data-id="${item.id}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
-                <button class="delete-item-btn" data-action="remove-item" data-id="${item.id}">
+                <button class="qty-btn icon-circle-btn" data-action="qty-decrease" data-line-key="${item.lineKey}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                <button class="qty-btn icon-circle-btn" data-action="qty-increase" data-line-key="${item.lineKey}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                <button class="delete-item-btn" data-action="remove-item" data-line-key="${item.lineKey}">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
@@ -608,7 +929,9 @@ function openProductModal(id, triggerEl = null) {
     document.getElementById('productModalRating').innerHTML = stars;
     document.getElementById('productModalTitle').textContent = label;
     document.getElementById('productModalPrice').textContent = `$${product.price.toFixed(2)}`;
+    renderProductModalModifiers(product);
     updateProductModalQtyDisplay();
+    updateProductModalPriceDisplay();
     applyUIStrings();
 
     const overlay = document.getElementById('productOverlay');
@@ -637,21 +960,49 @@ function closeProductModal() {
     productModalId = null;
     productModalQty = 1;
     productModalTrigger = null;
+    productModalSelections = {};
+    clearModifierError();
+    const modifiersEl = document.getElementById('productModalModifiers');
+    if (modifiersEl) {
+        modifiersEl.innerHTML = '';
+        modifiersEl.hidden = true;
+    }
+    const addPriceEl = document.getElementById('productModalAddPrice');
+    if (addPriceEl) addPriceEl.textContent = '';
     updateBackToTopButton();
 }
 
 function changeProductModalQty(delta) {
     productModalQty = Math.max(1, productModalQty + delta);
     updateProductModalQtyDisplay();
+    updateProductModalPriceDisplay();
 }
 
 function addProductModalToBasket() {
     if (productModalId == null) return;
-    addToBasket(productModalId, productModalQty);
+    const product = mockMenuData.find(p => p.id === productModalId);
+    if (!product) return;
+
+    const validation = validateModifierSelection(product);
+    if (!validation.valid) {
+        showModifierError(validation.error);
+        return;
+    }
+
+    const selectedModifiers = getSelectedModifiers(product);
+    addToBasket(productModalId, productModalQty, selectedModifiers);
     closeProductModal();
 }
 
 function setupProductModal() {
+    document.addEventListener('change', (e) => {
+        const input = e.target;
+        if (!input.closest('#productModalModifiers')) return;
+        if (input.matches('input[type="checkbox"], input[type="radio"]')) {
+            syncSelectionFromInput(input);
+        }
+    });
+
     document.addEventListener('click', (e) => {
         const actionEl = e.target.closest('[data-action]');
         if (!actionEl) return;
@@ -683,9 +1034,11 @@ function renderCheckoutSummary() {
 
     const lines = basket.map(item => {
         const label = item.translations[ACTIVE_LANG] || item.translations.en;
+        const modSummary = formatModifiersSummary(item.selectedModifiers);
+        const modLine = modSummary ? `<small class="checkout-summary-mods">+ ${modSummary}</small>` : '';
         const lineTotal = (item.price * item.quantity).toFixed(2);
         return `<div class="checkout-summary-row">
-            <span>${label} × ${item.quantity}</span>
+            <span>${label} × ${item.quantity}${modLine ? `<br>${modLine}` : ''}</span>
             <span>$${lineTotal}</span>
         </div>`;
     }).join('');
@@ -710,10 +1063,19 @@ function buildOrderPayload() {
             notes: notesEl.value.trim()
         },
         items: basket.map(item => ({
-            id: item.id,
+            id: item.productId,
             quantity: item.quantity,
+            basePrice: item.basePrice,
+            unitPrice: item.unitPrice,
             price: item.price,
-            title: item.translations[ACTIVE_LANG] || item.translations.en
+            title: item.translations[ACTIVE_LANG] || item.translations.en,
+            modifiers: (item.selectedModifiers || []).map(m => ({
+                templateId: m.templateId,
+                modifierId: m.modifierId,
+                materialId: m.materialId,
+                price: m.price,
+                name: m.label
+            }))
         })),
         total: getBasketTotal()
     };
@@ -887,10 +1249,10 @@ function setupEventDelegation() {
     document.getElementById('cart-items-wrapper').addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
-        const id = parseInt(btn.dataset.id, 10);
-        if (btn.dataset.action === 'qty-increase') changeQuantity(id,  1);
-        if (btn.dataset.action === 'qty-decrease') changeQuantity(id, -1);
-        if (btn.dataset.action === 'remove-item')  removeFromBasket(id);
+        const lineKey = btn.dataset.lineKey;
+        if (btn.dataset.action === 'qty-increase') changeQuantity(lineKey,  1);
+        if (btn.dataset.action === 'qty-decrease') changeQuantity(lineKey, -1);
+        if (btn.dataset.action === 'remove-item')  removeFromBasket(lineKey);
     });
 }
 
