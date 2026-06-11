@@ -59,7 +59,11 @@ const UI_STRINGS = {
         modifierChooseUpTo: 'Optional, up to {n}',
         modifierMinError: 'Please select at least {n} option(s) for "{name}".',
         modifierMaxError: 'You can select at most {n} option(s) for "{name}".',
-        modifierFree: 'Free'
+        modifierFree: 'Free',
+        cartAddedTitle: 'Great choice!',
+        cartAddedBody: 'Your item has been added to the basket.',
+        cartAddedContinue: 'Continue Browsing',
+        cartAddedCheckout: 'Go to Checkout'
     },
     ar: {
         menuTitle: 'قائمتنا ',
@@ -114,7 +118,11 @@ const UI_STRINGS = {
         modifierChooseUpTo: 'اختياري، حتى {n}',
         modifierMinError: 'يرجى اختيار {n} على الأقل من "{name}".',
         modifierMaxError: 'يمكنك اختيار {n} كحد أقصى من "{name}".',
-        modifierFree: 'مجاني'
+        modifierFree: 'مجاني',
+        cartAddedTitle: 'اختيار رائع!',
+        cartAddedBody: 'تمت إضافة الصنف إلى سلتك.',
+        cartAddedContinue: 'متابعة التصفح',
+        cartAddedCheckout: 'إتمام الطلب'
     }
 };
 
@@ -671,11 +679,46 @@ function clearModifierError() {
 }
 
 function showModifierError(message) {
-    const errorEl = document.getElementById('productModalModifierError');
-    if (errorEl) {
-        errorEl.textContent = message;
-        errorEl.hidden = false;
+    showToast(message, 'error');
+}
+
+// ─── Toast Notifications ──────────────────────────────────────────────────────
+
+const TOAST_ICONS = {
+    error:   'fa-circle-exclamation',
+    success: 'fa-circle-check',
+    warning: 'fa-triangle-exclamation',
+    info:    'fa-circle-info'
+};
+
+const MAX_TOASTS = 3;
+
+function showToast(message, type = 'error', duration = 3500) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const existing = container.querySelectorAll('.toast');
+    if (existing.length >= MAX_TOASTS) {
+        dismissToast(existing[0]);
     }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML = `
+        <i class="fa-solid ${TOAST_ICONS[type] || TOAST_ICONS.info} toast-icon" aria-hidden="true"></i>
+        <span>${message}</span>`;
+
+    container.appendChild(toast);
+
+    const timer = setTimeout(() => dismissToast(toast), duration);
+    toast.addEventListener('click', () => { clearTimeout(timer); dismissToast(toast); });
+}
+
+function dismissToast(toast) {
+    if (!toast || toast.classList.contains('removing')) return;
+    toast.classList.add('removing');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
 }
 
 function validateModifierSelection(product) {
@@ -827,8 +870,8 @@ function addToBasket(productId, qty = 1, selectedModifiers = []) {
     }
 
     updateBasketUI();
-    if (window.innerWidth <= 1024 && basket.length === 1 && existing === undefined) {
-        toggleCartPanel(true);
+    if (basket.length === 1 && existing === undefined) {
+        openCartAddedModal();
     }
 }
 
@@ -1112,7 +1155,7 @@ function resetCheckoutModalState() {
 
 function openCheckoutModal() {
     if (basket.length === 0) {
-        alert(t('emptyCartAlert'));
+        showToast(t('emptyCartAlert'), 'warning');
         return;
     }
 
@@ -1170,7 +1213,7 @@ function validateCheckoutForm() {
 
 async function submitOrder() {
     if (basket.length === 0) {
-        alert(t('emptyCartAlert'));
+        showToast(t('emptyCartAlert'), 'warning');
         return;
     }
     if (!validateCheckoutForm()) return;
@@ -1206,6 +1249,27 @@ async function submitOrder() {
     }
 }
 
+// ─── Cart Added Modal ─────────────────────────────────────────────────────────
+
+function openCartAddedModal() {
+    applyUIStrings();
+    const overlay = document.getElementById('cartAddedOverlay');
+    const modal = document.getElementById('cartAddedModal');
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeCartAddedModal() {
+    const overlay = document.getElementById('cartAddedOverlay');
+    const modal = document.getElementById('cartAddedModal');
+    overlay.classList.remove('open');
+    modal.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
 function setupCheckout() {
     document.getElementById('orderNowBtn').addEventListener('click', openCheckoutModal);
 
@@ -1221,10 +1285,26 @@ function setupCheckout() {
         if (actionEl.dataset.action === 'submit-order') {
             submitOrder();
         }
+        if (actionEl.dataset.action === 'close-cart-added') {
+            if (e.target.id === 'cartAddedOverlay') {
+                closeCartAddedModal();
+            }
+        }
+        if (actionEl.dataset.action === 'cart-added-continue') {
+            closeCartAddedModal();
+        }
+        if (actionEl.dataset.action === 'cart-added-checkout') {
+            closeCartAddedModal();
+            openCheckoutModal();
+        }
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
+        if (document.getElementById('cartAddedModal').classList.contains('open')) {
+            closeCartAddedModal();
+            return;
+        }
         if (document.getElementById('productModal').classList.contains('open')) {
             closeProductModal();
             return;
@@ -1293,7 +1373,8 @@ const BACK_TO_TOP_THRESHOLD = 300;
 function isOverlayOpen() {
     return document.getElementById('cartOverlay')?.classList.contains('open')
         || document.getElementById('checkoutModal')?.classList.contains('open')
-        || document.getElementById('productModal')?.classList.contains('open');
+        || document.getElementById('productModal')?.classList.contains('open')
+        || document.getElementById('cartAddedModal')?.classList.contains('open');
 }
 
 function updateBackToTopButton() {
