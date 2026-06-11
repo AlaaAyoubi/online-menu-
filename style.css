@@ -1590,7 +1590,7 @@ body.product-modal-open {
 
 #toast-container {
     position: fixed;
-    top: 1.25rem;
+    top: calc(1.25rem + env(safe-area-inset-top, 0px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 99999;
@@ -1616,6 +1616,8 @@ body.product-modal-open {
     pointer-events: auto;
     animation: toast-slide-in 0.28s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
     max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .toast.removing {
@@ -1669,7 +1671,7 @@ body.product-modal-open {
 
 @media (max-width: 480px) {
     #toast-container {
-        top: 0.75rem;
+        top: calc(0.75rem + env(safe-area-inset-top, 0px));
         max-width: 94vw;
     }
 
@@ -1731,6 +1733,7 @@ body.product-modal-open {
     text-align: center;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16);
     animation: cart-added-pop-in 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+    overscroll-behavior: contain;
 }
 
 .cart-added-icon-wrap {
@@ -1776,6 +1779,7 @@ body.product-modal-open {
     justify-content: center;
     gap: 8px;
     transition: opacity 0.2s, transform 0.15s;
+    touch-action: manipulation;
 }
 
 .cart-added-btn:active {
@@ -1805,11 +1809,44 @@ body.product-modal-open {
 }
 
 @media (max-width: 480px) {
-    .cart-added-modal {
-        width: calc(100% - 32px);
+
+    /* Redefine animation: scale pop-in → slide up from bottom */
+    @keyframes cart-added-pop-in {
+        from {
+            opacity: 0;
+            transform: translateY(60px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
+    /* Bottom-sheet positioning */
+    .cart-added-modal {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Rounded top corners only + safe-area bottom padding */
     .cart-added-modal-inner {
-        padding: 28px 20px 20px;
+        border-radius: 24px 24px 0 0;
+        padding: 8px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Drag handle — standard bottom-sheet visual indicator */
+    .cart-added-modal-inner::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: #ddd;
+        border-radius: 2px;
+        margin: 0 auto 20px;
     }
 }
