@@ -1569,38 +1569,40 @@ body.product-modal-open {
 @keyframes toast-slide-in {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(-16px) scale(0.96);
+        transform: translateY(-16px) scale(0.96);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        transform: translateY(0) scale(1);
     }
 }
 
 @keyframes toast-slide-out {
     from {
         opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
+        transform: translateY(0) scale(1);
     }
     to {
         opacity: 0;
-        transform: translateX(-50%) translateY(-12px) scale(0.96);
+        transform: translateY(-12px) scale(0.96);
     }
 }
 
 #toast-container {
     position: fixed;
     top: calc(1.25rem + env(safe-area-inset-top, 0px));
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     z-index: 99999;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     pointer-events: none;
-    width: max-content;
-    max-width: min(92vw, 420px);
+    width: 100%;
+    max-width: none;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
 }
 
 .toast {
@@ -1615,7 +1617,8 @@ body.product-modal-open {
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
     pointer-events: auto;
     animation: toast-slide-in 0.28s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
-    max-width: 100%;
+    width: 100%;
+    max-width: min(92vw, 420px);
     overflow-wrap: break-word;
     word-break: break-word;
 }
@@ -1672,12 +1675,13 @@ body.product-modal-open {
 @media (max-width: 480px) {
     #toast-container {
         top: calc(0.75rem + env(safe-area-inset-top, 0px));
-        max-width: 94vw;
+        padding-inline: max(12px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
     }
 
     .toast {
         font-size: 0.85rem;
         padding: 11px 15px;
+        max-width: 100%;
     }
 }
 
@@ -1701,11 +1705,11 @@ body.product-modal-open {
 @keyframes cart-added-pop-in {
     from {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.88);
+        transform: scale(0.88);
     }
     to {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: scale(1);
     }
 }
 
@@ -1808,13 +1812,13 @@ body.product-modal-open {
     transform: scaleX(-1);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
 
-    /* Redefine animation: scale pop-in → slide up from bottom */
+    /* Slide-up animation for bottom sheet (no positional translate on inner) */
     @keyframes cart-added-pop-in {
         from {
             opacity: 0;
-            transform: translateY(60px);
+            transform: translateY(100%);
         }
         to {
             opacity: 1;
