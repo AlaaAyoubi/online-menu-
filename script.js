@@ -60,6 +60,8 @@ const UI_STRINGS = {
         modifierMinError: 'Please select at least {n} option(s) for "{name}".',
         modifierMaxError: 'You can select at most {n} option(s) for "{name}".',
         modifierFree: 'Free',
+        modifierRemoveUpTo: 'Optional, remove up to {n}',
+        modifierRemoveOptional: 'Optional removals',
         cartAddedTitle: 'Great choice!',
         cartAddedBody: 'Your item has been added to the basket.',
         cartAddedContinue: 'Continue Browsing',
@@ -119,6 +121,8 @@ const UI_STRINGS = {
         modifierMinError: 'يرجى اختيار {n} على الأقل من "{name}".',
         modifierMaxError: 'يمكنك اختيار {n} كحد أقصى من "{name}".',
         modifierFree: 'مجاني',
+        modifierRemoveUpTo: 'اختياري، أزل حتى {n}',
+        modifierRemoveOptional: 'إزالات اختيارية',
         cartAddedTitle: 'اختيار رائع!',
         cartAddedBody: 'تمت إضافة الصنف إلى سلتك.',
         cartAddedContinue: 'متابعة التصفح',
@@ -185,7 +189,7 @@ const mockMenuData = [
         },
         category: "burgers", price: 5.00, rating: 5,
         image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400",
-        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
+        modifierTemplateIds: ['template_burger_removals', 'template_burger_extras', 'template_burger_sauce']
     },
     {
         id: 2,
@@ -196,7 +200,7 @@ const mockMenuData = [
         },
         category: "burgers", price: 5.50, rating: 5,
         image: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?q=80&w=400",
-        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
+        modifierTemplateIds: ['template_burger_removals', 'template_burger_extras', 'template_burger_sauce']
     },
     {
         id: 3,
@@ -207,7 +211,7 @@ const mockMenuData = [
         },
         category: "burgers", price: 6.80, rating: 4,
         image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400",
-        modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
+        modifierTemplateIds: ['template_burger_removals', 'template_burger_extras', 'template_burger_sauce']
     },
 
     // PIZZA
@@ -313,6 +317,19 @@ const mockMenuData = [
 ];
 
 const mockModifierTemplates = {
+    template_burger_removals: {
+        id: 'template_burger_removals',
+        templateType: 'remove',
+        translations: { en: 'Remove ingredients', ar: 'إزالة المكونات' },
+        multiSelect: true,
+        minCount: 0,
+        maxCount: 5,
+        options: [
+            { id: 'mod_no_onion', materialId: 5001, translations: { en: 'No Onion', ar: 'بدون بصل' }, price: 0 },
+            { id: 'mod_no_lettuce', materialId: 5002, translations: { en: 'No Lettuce', ar: 'بدون خس' }, price: 0 },
+            { id: 'mod_no_cheese', materialId: 5003, translations: { en: 'No Cheese', ar: 'بدون جبنة' }, price: -0.50 }
+        ]
+    },
     template_burger_extras: {
         id: 'template_burger_extras',
         translations: { en: 'Extra toppings', ar: 'إضافات' },
@@ -385,7 +402,7 @@ function mockFetch(category = 'all') {
 // ─── sessionStorage Cache ────────────────────────────────────────────────────
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MENU_CACHE_VERSION = 4; // bump when mockMenuData changes (invalidates stale sessionStorage)
+const MENU_CACHE_VERSION = 5; // bump when mockMenuData changes (invalidates stale sessionStorage)
 
 function getMenuCacheKey(category) {
     return `menu_cache_v${MENU_CACHE_VERSION}_${category}`;
@@ -651,7 +668,12 @@ function toggleCartPanel(isOpen) {
 
 function getTemplatesForProduct(product) {
     const ids = product.modifierTemplateIds || [];
-    return ids.map(id => mockModifierTemplates[id]).filter(Boolean);
+    const templates = ids.map(id => mockModifierTemplates[id]).filter(Boolean);
+    return templates.sort((a, b) => {
+        const aRemove = (a.templateType || 'add') === 'remove' ? 0 : 1;
+        const bRemove = (b.templateType || 'add') === 'remove' ? 0 : 1;
+        return aRemove - bRemove;
+    });
 }
 
 function getProductDescription(product) {
@@ -668,10 +690,18 @@ function getTemplateLabel(template) {
 
 function formatModifierOptionPrice(price) {
     if (price === 0) return t('modifierFree');
+    if (price < 0) return `-$${Math.abs(price).toFixed(2)}`;
     return `+$${price.toFixed(2)}`;
 }
 
 function getModifierHint(template) {
+    const templateType = template.templateType || 'add';
+    if (templateType === 'remove') {
+        if (template.maxCount > 0 && template.maxCount !== -1) {
+            return t('modifierRemoveUpTo').replace('{n}', template.maxCount);
+        }
+        return t('modifierRemoveOptional');
+    }
     if (!template.multiSelect && template.minCount >= 1) {
         return t('modifierChooseOne');
     }
@@ -702,6 +732,8 @@ function getSelectedModifiers(product) {
     const selected = [];
     getTemplatesForProduct(product).forEach(template => {
         const optionIds = productModalSelections[template.id] || new Set();
+        const templateType = template.templateType || 'add';
+        const isRemoval = templateType === 'remove';
         optionIds.forEach(optionId => {
             const option = template.options.find(o => o.id === optionId);
             if (!option) return;
@@ -710,7 +742,9 @@ function getSelectedModifiers(product) {
                 modifierId: option.id,
                 materialId: option.materialId,
                 price: option.price,
-                label: getModifierLabel(option)
+                label: getModifierLabel(option),
+                type: templateType,
+                isRemoval
             });
         });
     });
@@ -827,10 +861,15 @@ function renderProductModalModifiers(product, preserveSelections = false) {
         const hint = getModifierHint(template);
         const inputType = template.multiSelect ? 'checkbox' : 'radio';
         const inputName = template.multiSelect ? '' : `modifier-${template.id}`;
+        const isRemoval = (template.templateType || 'add') === 'remove';
+        const groupClass = isRemoval ? 'modifier-group modifier-group--remove' : 'modifier-group';
 
         const optionsHtml = template.options.map(option => {
             const label = getModifierLabel(option);
             const priceLabel = formatModifierOptionPrice(option.price);
+            const priceClass = option.price < 0
+                ? 'modifier-option-price modifier-option-price--negative'
+                : 'modifier-option-price';
             return `
                 <label class="modifier-option">
                     <input type="${inputType}"
@@ -838,12 +877,12 @@ function renderProductModalModifiers(product, preserveSelections = false) {
                            data-template-id="${template.id}"
                            data-option-id="${option.id}">
                     <span class="modifier-option-label">${label}</span>
-                    <span class="modifier-option-price">${priceLabel}</span>
+                    <span class="${priceClass}">${priceLabel}</span>
                 </label>`;
         }).join('');
 
         return `
-            <fieldset class="modifier-group">
+            <fieldset class="${groupClass}">
                 <legend class="modifier-group-title">${groupTitle}</legend>
                 <p class="modifier-hint">${hint}</p>
                 <div class="modifier-options">${optionsHtml}</div>
@@ -1191,7 +1230,8 @@ function buildOrderPayload() {
                 modifierId: m.modifierId,
                 materialId: m.materialId,
                 price: m.price,
-                name: m.label
+                name: m.label,
+                type: m.type || (m.isRemoval ? 'remove' : 'add')
             }))
         })),
         total: getBasketTotal()

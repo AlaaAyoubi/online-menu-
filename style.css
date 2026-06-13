@@ -1333,6 +1333,26 @@ body.product-modal-open {
     padding: 0;
 }
 
+.modifier-group--remove {
+    background: var(--bg-cream);
+    border-radius: 14px;
+    padding: 12px 14px;
+    border-inline-start: 3px solid var(--text-muted);
+}
+
+.modifier-group--remove .modifier-group-title::before {
+    content: '−';
+    display: inline-block;
+    margin-inline-end: 6px;
+    font-weight: 800;
+    color: var(--text-muted);
+}
+
+.modifier-option-price--negative {
+    color: var(--primary-red);
+    font-weight: 700;
+}
+
 .modifier-group-title {
     font-size: 0.95rem;
     font-weight: 800;
