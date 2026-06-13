@@ -1301,6 +1301,20 @@ body.product-modal-open {
     margin-bottom: 12px;
 }
 
+.product-modal-description {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    text-align: center;
+    margin: 0 auto 16px;
+    max-width: 320px;
+    overflow-wrap: break-word;
+}
+
+.product-modal-description[hidden] {
+    display: none;
+}
+
 .product-modal-modifiers {
     text-align: start;
     margin-bottom: 16px;

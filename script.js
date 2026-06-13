@@ -157,6 +157,15 @@ function switchLanguage(lang) {
     if (productModalId != null) {
         const product = mockMenuData.find(p => p.id === productModalId);
         if (product) {
+            const label = product.translations[ACTIVE_LANG] || product.translations.en;
+            document.getElementById('productModalTitle').textContent = label;
+            document.getElementById('productModalImage').alt = label;
+            const desc = getProductDescription(product);
+            const descEl = document.getElementById('productModalDescription');
+            if (descEl) {
+                descEl.textContent = desc;
+                descEl.hidden = !desc;
+            }
             renderProductModalModifiers(product, true);
             updateProductModalPriceDisplay();
         }
@@ -170,6 +179,10 @@ const mockMenuData = [
     {
         id: 1,
         translations: { en: "Classic Chicken Burger", ar: "برغر دجاج كلاسيك" },
+        descriptions: {
+            en: "Crispy chicken fillet, fresh lettuce, tomato, and house mayo on a toasted bun.",
+            ar: "فillet دجاج مقرمش، خس طازج، طماطم، ومايونيز منزلي في خبز محمص."
+        },
         category: "burgers", price: 5.00, rating: 5,
         image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400",
         modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
@@ -177,6 +190,10 @@ const mockMenuData = [
     {
         id: 2,
         translations: { en: "Crispy Zinger Burger", ar: "برغر زينجر مقرمش" },
+        descriptions: {
+            en: "Spicy breaded chicken, crunchy slaw, and zinger sauce in a soft brioche bun.",
+            ar: "دجاج متبل ومقرمش، كول سلو، وصلصة زينجر في خبز brioche طري."
+        },
         category: "burgers", price: 5.50, rating: 5,
         image: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?q=80&w=400",
         modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
@@ -184,6 +201,10 @@ const mockMenuData = [
     {
         id: 3,
         translations: { en: "Smoked BBQ Beef Burger", ar: "برغر لحم بقر مدخن بالبي بي كيو" },
+        descriptions: {
+            en: "Juicy beef patty glazed with smoky BBQ sauce, cheddar, and caramelized onions.",
+            ar: "قطعة لحم بقرية عصيرة مع صلصة باربكيو مدخنة، شيدر، وبصل مكرمل."
+        },
         category: "burgers", price: 6.80, rating: 4,
         image: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=400",
         modifierTemplateIds: ['template_burger_extras', 'template_burger_sauce']
@@ -193,6 +214,10 @@ const mockMenuData = [
     {
         id: 4,
         translations: { en: "Classic Chicken Pizza", ar: "بيتزا دجاج كلاسيك" },
+        descriptions: {
+            en: "Hand-stretched dough topped with grilled chicken, mozzarella, and tomato sauce.",
+            ar: "عجينة ممدودة يدوياً مع دجاج مشوي، موزاريلا، وصلصة طماطم."
+        },
         category: "pizza", price: 7.20, rating: 4,
         image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400",
         modifierTemplateIds: ['template_pizza_toppings']
@@ -200,6 +225,10 @@ const mockMenuData = [
     {
         id: 5,
         translations: { en: "Pepperoni Passion Pizza", ar: "بيتزا بيبيروني فاخرة" },
+        descriptions: {
+            en: "Generous pepperoni slices, melted mozzarella, and our signature herb crust.",
+            ar: "شرائح بيبيروني وفيرة، موزاريلا ذائبة، وقشرة أعشاب مميزة."
+        },
         category: "pizza", price: 8.50, rating: 5,
         image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=400",
         modifierTemplateIds: ['template_pizza_toppings']
@@ -207,6 +236,10 @@ const mockMenuData = [
     {
         id: 6,
         translations: { en: "Margherita Supreme", ar: "مارغريتا سوبريم" },
+        descriptions: {
+            en: "Fresh basil, buffalo mozzarella, and San Marzano tomato on a thin crispy base.",
+            ar: "ريحان طازج، موزاريلا بوفالو، وطماطم San Marzano على قاعدة رقيقة مقرمشة."
+        },
         category: "pizza", price: 6.99, rating: 5,
         image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?q=80&w=400",
         modifierTemplateIds: ['template_pizza_toppings']
@@ -216,18 +249,30 @@ const mockMenuData = [
     {
         id: 7,
         translations: { en: "Chicken Fry Strips", ar: "أصابع دجاج مقلية" },
+        descriptions: {
+            en: "Golden crispy chicken strips served with your choice of dipping sauce.",
+            ar: "أصابع دجاج مقرمشة ذهبية تُقدَّم مع صلصة غمس من اختيارك."
+        },
         category: "sides", price: 5.00, rating: 5,
         image: "https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=400"
     },
     {
         id: 8,
         translations: { en: "Golden French Fries", ar: "بطاطس مقلية ذهبية" },
+        descriptions: {
+            en: "Thick-cut potatoes fried to a golden crunch, lightly seasoned with sea salt.",
+            ar: "بطاطس مقطعة سميكاً ومقلية حتى تصبح مقرمشة، مع تتبيل خفيف بملح البحر."
+        },
         category: "sides", price: 2.50, rating: 4,
         image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=400"
     },
     {
         id: 9,
         translations: { en: "Crispy Mozzarella Sticks", ar: "عيدان موزاريلا مقرمشة" },
+        descriptions: {
+            en: "Breaded mozzarella sticks with a melty center, served with marinara dip.",
+            ar: "عيدان موزاريلا مغلفة بفتات الخبز مع قلب ذائب، تُقدَّم مع صلصة marinara."
+        },
         category: "sides", price: 3.80, rating: 5,
         image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=400"
     },
@@ -236,6 +281,10 @@ const mockMenuData = [
     {
         id: 10,
         translations: { en: "Coca Cola Ice", ar: "كوكا كولا مثلجة" },
+        descriptions: {
+            en: "Chilled Coca-Cola served over ice — the perfect meal companion.",
+            ar: "كوكا كولا مبردة مع ثلج — الرفيق المثالي لوجبتك."
+        },
         category: "drinks", price: 1.50, rating: 5,
         image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=400",
         modifierTemplateIds: ['template_drink_size']
@@ -243,6 +292,10 @@ const mockMenuData = [
     {
         id: 11,
         translations: { en: "Strawberry Milkshake", ar: "ميلك شيك فراولة" },
+        descriptions: {
+            en: "Creamy vanilla ice cream blended with fresh strawberries and topped with whipped cream.",
+            ar: "آيس كريم فانيلا كريمي ممزوج مع فراولة طازجة ومزين بالكريمة المخفوقة."
+        },
         category: "drinks", price: 3.50, rating: 5,
         image: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=400",
         modifierTemplateIds: ['template_drink_size']
@@ -250,6 +303,10 @@ const mockMenuData = [
     {
         id: 12,
         translations: { en: "Fresh Orange Juice", ar: "عصير برتقال طازج" },
+        descriptions: {
+            en: "100% freshly squeezed oranges — no added sugar, no preservatives.",
+            ar: "برتقال معصور طازج 100% — بدون سكر مضاف وبدون مواد حافظة."
+        },
         category: "drinks", price: 2.50, rating: 4,
         image: "https://images.unsplash.com/photo-1613478223719-2ab802602423?q=80&w=400"
     }
@@ -328,7 +385,7 @@ function mockFetch(category = 'all') {
 // ─── sessionStorage Cache ────────────────────────────────────────────────────
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MENU_CACHE_VERSION = 3; // bump when mockMenuData changes (invalidates stale sessionStorage)
+const MENU_CACHE_VERSION = 4; // bump when mockMenuData changes (invalidates stale sessionStorage)
 
 function getMenuCacheKey(category) {
     return `menu_cache_v${MENU_CACHE_VERSION}_${category}`;
@@ -448,7 +505,9 @@ function normalizeSearchText(str) {
 function itemMatchesSearch(item, query, lang) {
     if (!query) return true;
     const label = item.translations[lang] || item.translations.en;
-    return normalizeSearchText(label).includes(query);
+    const desc = item.descriptions?.[lang] || item.descriptions?.en || '';
+    return normalizeSearchText(label).includes(query)
+        || normalizeSearchText(desc).includes(query);
 }
 
 function getFilteredMenuItems() {
@@ -593,6 +652,10 @@ function toggleCartPanel(isOpen) {
 function getTemplatesForProduct(product) {
     const ids = product.modifierTemplateIds || [];
     return ids.map(id => mockModifierTemplates[id]).filter(Boolean);
+}
+
+function getProductDescription(product) {
+    return product.descriptions?.[ACTIVE_LANG] || product.descriptions?.en || '';
 }
 
 function getModifierLabel(option) {
@@ -972,6 +1035,12 @@ function openProductModal(id, triggerEl = null) {
     document.getElementById('productModalRating').innerHTML = stars;
     document.getElementById('productModalTitle').textContent = label;
     document.getElementById('productModalPrice').textContent = `$${product.price.toFixed(2)}`;
+    const desc = getProductDescription(product);
+    const descEl = document.getElementById('productModalDescription');
+    if (descEl) {
+        descEl.textContent = desc;
+        descEl.hidden = !desc;
+    }
     renderProductModalModifiers(product);
     updateProductModalQtyDisplay();
     updateProductModalPriceDisplay();
@@ -1012,6 +1081,11 @@ function closeProductModal() {
     }
     const addPriceEl = document.getElementById('productModalAddPrice');
     if (addPriceEl) addPriceEl.textContent = '';
+    const descEl = document.getElementById('productModalDescription');
+    if (descEl) {
+        descEl.textContent = '';
+        descEl.hidden = true;
+    }
     updateBackToTopButton();
 }
 
