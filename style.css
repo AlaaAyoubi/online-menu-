@@ -8,6 +8,7 @@
     --font-family: 'Plus Jakarta Sans', sans-serif;
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
     --shadow-card: 0 16px 32px rgba(255, 70, 70, 0.04);
+    --bottom-nav-height: 0px;
 }
 
 * {
@@ -1566,7 +1567,7 @@ body.product-modal-open {
 
 .back-to-top-btn {
     position: fixed;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--bottom-nav-height) + 20px);
     right: 20px;
     width: 48px;
     height: 48px;
@@ -1903,9 +1904,13 @@ body.product-modal-open {
 
 @media (max-width: 1024px) {
 
+    :root {
+        --bottom-nav-height: calc(64px + env(safe-area-inset-bottom));
+    }
+
     /* Prevent last menu items from hiding behind the nav bar */
     body {
-        padding-bottom: calc(64px + env(safe-area-inset-bottom));
+        padding-bottom: var(--bottom-nav-height);
     }
 
     #bottom-nav {
