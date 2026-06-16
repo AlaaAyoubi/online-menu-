@@ -62,6 +62,7 @@ const UI_STRINGS = {
         modifierFree: 'Free',
         modifierRemoveUpTo: 'Optional, remove up to {n}',
         modifierRemoveOptional: 'Optional removals',
+        without: 'Without',
         cartAddedTitle: 'Great choice!',
         cartAddedBody: 'Your item has been added to the basket.',
         cartAddedContinue: 'Continue Browsing',
@@ -123,6 +124,7 @@ const UI_STRINGS = {
         modifierFree: 'مجاني',
         modifierRemoveUpTo: 'اختياري، أزل حتى {n}',
         modifierRemoveOptional: 'إزالات اختيارية',
+        without: 'بدون',
         cartAddedTitle: 'اختيار رائع!',
         cartAddedBody: 'تمت إضافة الصنف إلى سلتك.',
         cartAddedContinue: 'متابعة التصفح',
@@ -130,50 +132,48 @@ const UI_STRINGS = {
     }
 };
 
-function t(key) {
-    return UI_STRINGS[ACTIVE_LANG][key] ?? UI_STRINGS.en[key];
-}
+const I18n = {
+    get lang() { return ACTIVE_LANG; },
 
-function applyUIStrings() {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        el.textContent = t(key);
-    });
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
-    });
-    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
-        el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
-    });
-}
+    setLang(lang) {
+        ACTIVE_LANG = lang;
+        const html = document.documentElement;
+        html.lang = lang;
+        html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        const labelEl = document.getElementById('langLabel');
+        if (labelEl) labelEl.textContent = lang === 'ar' ? 'EN' : 'AR';
+    },
+
+    t(key) {
+        return UI_STRINGS[ACTIVE_LANG][key] ?? UI_STRINGS.en[key];
+    },
+
+    applyUIStrings() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = this.t(key);
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = this.t(el.getAttribute('data-i18n-placeholder'));
+        });
+        document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+            el.setAttribute('aria-label', this.t(el.getAttribute('data-i18n-aria')));
+        });
+    }
+};
+
+function t(key) { return I18n.t(key); }
+function applyUIStrings() { I18n.applyUIStrings(); }
 
 function switchLanguage(lang) {
-    ACTIVE_LANG = lang;
-    const html = document.documentElement;
-    html.lang = lang;
-    html.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.getElementById('langLabel').textContent = lang === 'ar' ? 'EN' : 'AR';
-    applyUIStrings();
+    I18n.setLang(lang);
+    I18n.applyUIStrings();
     initBrandLogo();
-    applyFiltersAndRender();
-    updateBasketUI();
+    MenuComponent.refresh();
+    BasketComponent.refresh();
+    ProductModalComponent.refresh();
+    CheckoutComponent.refresh();
     positionBackToTopFab();
-    if (productModalId != null) {
-        const product = mockMenuData.find(p => p.id === productModalId);
-        if (product) {
-            const label = product.translations[ACTIVE_LANG] || product.translations.en;
-            document.getElementById('productModalTitle').textContent = label;
-            document.getElementById('productModalImage').alt = label;
-            const desc = getProductDescription(product);
-            const descEl = document.getElementById('productModalDescription');
-            if (descEl) {
-                descEl.textContent = desc;
-                descEl.hidden = !desc;
-            }
-            renderProductModalModifiers(product, true);
-            updateProductModalPriceDisplay();
-        }
-    }
 }
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -349,6 +349,7 @@ const mockModifierTemplates = {
         minCount: 1,
         maxCount: 1,
         options: [
+            { id: 'mod_no_sauce', materialId: 2004, translations: { en: 'No Sauce', ar: 'بدون صلصة' }, price: 0 },
             { id: 'mod_ketchup', materialId: 2001, translations: { en: 'Ketchup', ar: 'كاتشب' }, price: 0 },
             { id: 'mod_mayo', materialId: 2002, translations: { en: 'Mayo', ar: 'مايونيز' }, price: 0 },
             { id: 'mod_bbq', materialId: 2003, translations: { en: 'BBQ Sauce', ar: 'صلصة باربكيو' }, price: 0.25 }
@@ -649,6 +650,13 @@ function filterMenu(category, event) {
     loadMenu(category);
 }
 
+const MenuComponent = {
+    refresh() { applyFiltersAndRender(); },
+    load(category) { return loadMenu(category); },
+    setup() { setupSearch(); },
+    filter(category, event) { filterMenu(category, event); }
+};
+
 // ─── Cart Panel ──────────────────────────────────────────────────────────────
 
 function toggleCartPanel(isOpen) {
@@ -662,6 +670,76 @@ function toggleCartPanel(isOpen) {
         overlay.classList.remove("open");
     }
     updateBackToTopButton();
+}
+
+// ─── Bottom Navigation Bar ───────────────────────────────────────────────────
+
+const BOTTOM_NAV_VIEWS = ['menu', 'offers', 'cart', 'orders'];
+
+function switchView(viewName) {
+    // Guard: no-op when the bottom nav is not rendered (desktop)
+    const nav = document.getElementById('bottom-nav');
+    if (!nav || getComputedStyle(nav).display === 'none') return;
+
+    BOTTOM_NAV_VIEWS.forEach(v => {
+        const view = document.getElementById(`${v}-view`);
+        if (view) view.hidden = v !== viewName;
+    });
+
+    nav.querySelectorAll('.nav-tab').forEach(tab => {
+        const isActive = tab.dataset.view === viewName;
+        tab.classList.toggle('active', isActive);
+        if (isActive) {
+            tab.setAttribute('aria-current', 'page');
+        } else {
+            tab.removeAttribute('aria-current');
+        }
+    });
+
+    // Close the sidebar drawer if navigating away from cart context
+    if (viewName !== 'cart') toggleCartPanel(false);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function initBottomNav() {
+    const nav = document.getElementById('bottom-nav');
+    if (!nav) return;
+
+    nav.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const viewName = tab.dataset.view;
+            switchView(viewName);
+            history.pushState({ view: viewName }, '', `#${viewName}`);
+        });
+    });
+
+    // Hardware/browser back-button support
+    window.addEventListener('popstate', (e) => {
+        const viewName = e.state?.view ?? 'menu';
+        switchView(viewName);
+    });
+
+    // Restore view from URL hash on initial load (e.g. shared links, refresh)
+    const hashView = location.hash.slice(1);
+    if (BOTTOM_NAV_VIEWS.includes(hashView)) {
+        switchView(hashView);
+        // Replace rather than push so back-button exits the app cleanly
+        history.replaceState({ view: hashView }, '', `#${hashView}`);
+    }
+
+    // Wire up the cart-view items delegation
+    const cartViewItems = document.getElementById('cart-view-items');
+    if (cartViewItems) {
+        cartViewItems.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const lineKey = btn.dataset.lineKey;
+            if (btn.dataset.action === 'qty-increase') changeQuantity(lineKey,  1);
+            if (btn.dataset.action === 'qty-decrease') changeQuantity(lineKey, -1);
+            if (btn.dataset.action === 'remove-item')  removeFromBasket(lineKey);
+        });
+    }
 }
 
 // ─── Modifier Templates ──────────────────────────────────────────────────────
@@ -753,7 +831,9 @@ function getSelectedModifiers(product) {
 
 function computeUnitPrice(product, selectedModifiers) {
     const mods = selectedModifiers ?? getSelectedModifiers(product);
-    const modifierTotal = mods.reduce((sum, m) => sum + m.price, 0);
+    const modifierTotal = mods
+        .filter(m => !m.isRemoval)
+        .reduce((sum, m) => sum + m.price, 0);
     return product.price + modifierTotal;
 }
 
@@ -762,9 +842,12 @@ function buildLineKey(productId, selectedModifiers) {
     return `${productId}|${modIds}`;
 }
 
-function formatModifiersSummary(selectedModifiers) {
-    if (!selectedModifiers?.length) return '';
-    return selectedModifiers.map(m => m.label).join(', ');
+function groupModifiers(selectedModifiers) {
+    if (!selectedModifiers?.length) return { additions: [], removals: [] };
+    return {
+        additions: selectedModifiers.filter(m => !m.isRemoval),
+        removals:  selectedModifiers.filter(m =>  m.isRemoval)
+    };
 }
 
 function clearModifierError() {
@@ -866,6 +949,16 @@ function renderProductModalModifiers(product, preserveSelections = false) {
 
         const optionsHtml = template.options.map(option => {
             const label = getModifierLabel(option);
+            if (isRemoval) {
+                return `
+                <label class="modifier-option modifier-option--removal">
+                    <input type="${inputType}"
+                           name="${inputName}"
+                           data-template-id="${template.id}"
+                           data-option-id="${option.id}">
+                    <span class="modifier-option-label">${label}</span>
+                </label>`;
+            }
             const priceLabel = formatModifierOptionPrice(option.price);
             const priceClass = option.price < 0
                 ? 'modifier-option-price modifier-option-price--negative'
@@ -1000,40 +1093,22 @@ function clearBasket() {
     }
 }
 
-function updateBasketUI() {
-    const wrapper = document.getElementById("cart-items-wrapper");
-    const countBadge = document.getElementById("cart-count");
-    const headerCountBadge = document.getElementById("header-cart-count");
-    const subtotalText = document.getElementById("subtotal-price");
-    const totalText = document.getElementById("total-price");
-
-    const totalItemsCount = basket.reduce((sum, item) => sum + item.quantity, 0);
-    countBadge.innerText = `${totalItemsCount} ${totalItemsCount !== 1 ? t('items') : t('item')}`;
-    headerCountBadge.innerText = totalItemsCount;
-
-    if (basket.length === 0) {
-        const [line1, line2] = t('emptyBasket').split('\n');
-        wrapper.innerHTML = `
-            <div class="empty-state">
-                <i class="fa-solid fa-cookie-bite"></i>
-                <p>${line1}<br>${line2}</p>
-            </div>`;
-        subtotalText.innerText = "$0.00";
-        totalText.innerText = "$0.00";
-        return;
-    }
-
-    wrapper.innerHTML = basket.map(item => {
+function buildCartRowsHTML() {
+    return basket.map(item => {
         const label = item.translations[ACTIVE_LANG] || item.translations.en;
-        const modSummary = formatModifiersSummary(item.selectedModifiers);
-        const modLine = modSummary
-            ? `<span class="cart-row-modifiers">+ ${modSummary}</span>`
+        const { additions, removals } = groupModifiers(item.selectedModifiers);
+        const addLine = additions.length
+            ? `<span class="cart-row-modifiers cart-row-modifiers--add">+ ${additions.map(m => m.label).join(', ')}</span>`
+            : '';
+        const removeLine = removals.length
+            ? `<span class="cart-row-modifiers cart-row-modifiers--remove">${t('without')}: ${removals.map(m => m.label).join(', ')}</span>`
             : '';
         return `
         <div class="cart-row">
             <div class="cart-row-details">
                 <strong>${label}</strong>
-                ${modLine}
+                ${addLine}
+                ${removeLine}
                 <span>$${item.price.toFixed(2)} × ${item.quantity}</span>
             </div>
             <div class="qty-controls">
@@ -1045,11 +1120,81 @@ function updateBasketUI() {
             </div>
         </div>`;
     }).join('');
+}
+
+function updateBasketUI() {
+    const wrapper          = document.getElementById("cart-items-wrapper");
+    const countBadge       = document.getElementById("cart-count");
+    const headerCountBadge = document.getElementById("header-cart-count");
+    const subtotalText     = document.getElementById("subtotal-price");
+    const totalText        = document.getElementById("total-price");
+
+    // Cart-view (mobile full-page) counterparts
+    const cvWrapper   = document.getElementById("cart-view-items");
+    const cvCount     = document.getElementById("cart-view-count");
+    const cvSubtotal  = document.getElementById("cart-view-subtotal");
+    const cvTotal     = document.getElementById("cart-view-total");
+
+    const totalItemsCount = basket.reduce((sum, item) => sum + item.quantity, 0);
+    const countLabel = `${totalItemsCount} ${totalItemsCount !== 1 ? t('items') : t('item')}`;
+
+    countBadge.innerText       = countLabel;
+    headerCountBadge.innerText = totalItemsCount;
+    if (cvCount) cvCount.innerText = countLabel;
+
+    // ── Bottom nav badge sync ──────────────────────────────────
+    const navBadge = document.getElementById('bottom-nav-cart-badge');
+    if (navBadge) {
+        const prev = parseInt(navBadge.textContent, 10) || 0;
+        navBadge.textContent = totalItemsCount;
+        navBadge.hidden = totalItemsCount === 0;
+        // Update Cart tab accessible label
+        const cartTab = document.querySelector('#bottom-nav [data-view="cart"]');
+        if (cartTab) cartTab.setAttribute('aria-label', `Cart, ${countLabel}`);
+        // Trigger pop animation only when count increases
+        if (totalItemsCount > prev) {
+            navBadge.classList.remove('pop');
+            void navBadge.offsetWidth; // reflow to restart animation
+            navBadge.classList.add('pop');
+        }
+    }
+
+    if (basket.length === 0) {
+        const [line1, line2] = t('emptyBasket').split('\n');
+        const emptyHTML = `
+            <div class="empty-state">
+                <i class="fa-solid fa-cookie-bite"></i>
+                <p>${line1}<br>${line2}</p>
+            </div>`;
+        wrapper.innerHTML              = emptyHTML;
+        if (cvWrapper) cvWrapper.innerHTML = emptyHTML;
+        subtotalText.innerText         = "$0.00";
+        totalText.innerText            = "$0.00";
+        if (cvSubtotal) cvSubtotal.innerText = "$0.00";
+        if (cvTotal)    cvTotal.innerText    = "$0.00";
+        return;
+    }
+
+    const rowsHTML = buildCartRowsHTML();
+    wrapper.innerHTML              = rowsHTML;
+    if (cvWrapper) cvWrapper.innerHTML = rowsHTML;
 
     const totalAmount = basket.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    subtotalText.innerText = `$${totalAmount.toFixed(2)}`;
-    totalText.innerText = `$${totalAmount.toFixed(2)}`;
+    subtotalText.innerText         = `$${totalAmount.toFixed(2)}`;
+    totalText.innerText            = `$${totalAmount.toFixed(2)}`;
+    if (cvSubtotal) cvSubtotal.innerText = `$${totalAmount.toFixed(2)}`;
+    if (cvTotal)    cvTotal.innerText    = `$${totalAmount.toFixed(2)}`;
 }
+
+const BasketComponent = {
+    refresh() { updateBasketUI(); },
+    add(productId, qty, modifiers) { addToBasket(productId, qty, modifiers); },
+    changeQuantity(lineKey, amount) { changeQuantity(lineKey, amount); },
+    remove(lineKey) { removeFromBasket(lineKey); },
+    clear() { clearBasket(); },
+    getTotal() { return getBasketTotal(); },
+    togglePanel(isOpen) { toggleCartPanel(isOpen); }
+};
 
 // ─── Product Detail Modal ────────────────────────────────────────────────────
 
@@ -1058,74 +1203,92 @@ function updateProductModalQtyDisplay() {
     if (qtyEl) qtyEl.textContent = productModalQty;
 }
 
-function openProductModal(id, triggerEl = null) {
-    const product = mockMenuData.find(p => p.id === id);
-    if (!product) return;
+const ProductModalComponent = {
+    refresh(preserveSelections = true) {
+        if (productModalId == null) return;
+        const product = mockMenuData.find(p => p.id === productModalId);
+        if (!product) return;
 
-    productModalId = id;
-    productModalQty = 1;
-    productModalTrigger = triggerEl;
+        const label = product.translations[ACTIVE_LANG] || product.translations.en;
+        document.getElementById('productModalTitle').textContent = label;
+        document.getElementById('productModalImage').alt = label;
+        const desc = getProductDescription(product);
+        const descEl = document.getElementById('productModalDescription');
+        if (descEl) {
+            descEl.textContent = desc;
+            descEl.hidden = !desc;
+        }
+        renderProductModalModifiers(product, preserveSelections);
+        updateProductModalPriceDisplay();
+        applyUIStrings();
+    },
 
-    const label = product.translations[ACTIVE_LANG] || product.translations.en;
-    const stars = Array(product.rating).fill('<i class="fa-solid fa-star"></i>').join('');
+    open(id, triggerEl = null) {
+        const product = mockMenuData.find(p => p.id === id);
+        if (!product) return;
 
-    document.getElementById('productModalImage').src = product.image;
-    document.getElementById('productModalImage').alt = label;
-    document.getElementById('productModalRating').innerHTML = stars;
-    document.getElementById('productModalTitle').textContent = label;
-    document.getElementById('productModalPrice').textContent = `$${product.price.toFixed(2)}`;
-    const desc = getProductDescription(product);
-    const descEl = document.getElementById('productModalDescription');
-    if (descEl) {
-        descEl.textContent = desc;
-        descEl.hidden = !desc;
+        productModalId = id;
+        productModalQty = 1;
+        productModalTrigger = triggerEl;
+
+        const stars = Array(product.rating).fill('<i class="fa-solid fa-star"></i>').join('');
+
+        document.getElementById('productModalImage').src = product.image;
+        document.getElementById('productModalRating').innerHTML = stars;
+        document.getElementById('productModalPrice').textContent = `$${product.price.toFixed(2)}`;
+        this.refresh(false);
+        updateProductModalQtyDisplay();
+
+        const overlay = document.getElementById('productOverlay');
+        const modal = document.getElementById('productModal');
+        overlay.classList.add('open');
+        modal.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('product-modal-open');
+        modal.querySelector('.product-close-btn').focus();
+        updateBackToTopButton();
+    },
+
+    close() {
+        const overlay = document.getElementById('productOverlay');
+        const modal = document.getElementById('productModal');
+        overlay.classList.remove('open');
+        modal.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('product-modal-open');
+
+        if (productModalTrigger && typeof productModalTrigger.focus === 'function') {
+            productModalTrigger.focus();
+        }
+        productModalId = null;
+        productModalQty = 1;
+        productModalTrigger = null;
+        productModalSelections = {};
+        clearModifierError();
+        const modifiersEl = document.getElementById('productModalModifiers');
+        if (modifiersEl) {
+            modifiersEl.innerHTML = '';
+            modifiersEl.hidden = true;
+        }
+        const addPriceEl = document.getElementById('productModalAddPrice');
+        if (addPriceEl) addPriceEl.textContent = '';
+        const descEl = document.getElementById('productModalDescription');
+        if (descEl) {
+            descEl.textContent = '';
+            descEl.hidden = true;
+        }
+        updateBackToTopButton();
     }
-    renderProductModalModifiers(product);
-    updateProductModalQtyDisplay();
-    updateProductModalPriceDisplay();
-    applyUIStrings();
+};
 
-    const overlay = document.getElementById('productOverlay');
-    const modal = document.getElementById('productModal');
-    overlay.classList.add('open');
-    modal.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('product-modal-open');
-    modal.querySelector('.product-close-btn').focus();
-    updateBackToTopButton();
+function openProductModal(id, triggerEl = null) {
+    ProductModalComponent.open(id, triggerEl);
 }
 
 function closeProductModal() {
-    const overlay = document.getElementById('productOverlay');
-    const modal = document.getElementById('productModal');
-    overlay.classList.remove('open');
-    modal.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('product-modal-open');
-
-    if (productModalTrigger && typeof productModalTrigger.focus === 'function') {
-        productModalTrigger.focus();
-    }
-    productModalId = null;
-    productModalQty = 1;
-    productModalTrigger = null;
-    productModalSelections = {};
-    clearModifierError();
-    const modifiersEl = document.getElementById('productModalModifiers');
-    if (modifiersEl) {
-        modifiersEl.innerHTML = '';
-        modifiersEl.hidden = true;
-    }
-    const addPriceEl = document.getElementById('productModalAddPrice');
-    if (addPriceEl) addPriceEl.textContent = '';
-    const descEl = document.getElementById('productModalDescription');
-    if (descEl) {
-        descEl.textContent = '';
-        descEl.hidden = true;
-    }
-    updateBackToTopButton();
+    ProductModalComponent.close();
 }
 
 function changeProductModalQty(delta) {
@@ -1190,11 +1353,13 @@ function renderCheckoutSummary() {
 
     const lines = basket.map(item => {
         const label = item.translations[ACTIVE_LANG] || item.translations.en;
-        const modSummary = formatModifiersSummary(item.selectedModifiers);
-        const modLine = modSummary ? `<small class="checkout-summary-mods">+ ${modSummary}</small>` : '';
+        const { additions, removals } = groupModifiers(item.selectedModifiers);
+        const addLine  = additions.length ? `<small class="checkout-summary-mods checkout-summary-mods--add">+ ${additions.map(m => m.label).join(', ')}</small>` : '';
+        const remLine  = removals.length  ? `<small class="checkout-summary-mods checkout-summary-mods--remove">${t('without')}: ${removals.map(m => m.label).join(', ')}</small>` : '';
+        const modsHtml = (addLine || remLine) ? `<br>${addLine}${remLine ? (addLine ? '<br>' : '') + remLine : ''}` : '';
         const lineTotal = (item.price * item.quantity).toFixed(2);
         return `<div class="checkout-summary-row">
-            <span>${label} × ${item.quantity}${modLine ? `<br>${modLine}` : ''}</span>
+            <span>${label} × ${item.quantity}${modsHtml}</span>
             <span>$${lineTotal}</span>
         </div>`;
     }).join('');
@@ -1205,6 +1370,15 @@ function renderCheckoutSummary() {
             <span>$${getBasketTotal().toFixed(2)}</span>
         </div>`;
 }
+
+const CheckoutComponent = {
+    refresh() {
+        const modal = document.getElementById('checkoutModal');
+        if (modal?.classList.contains('open')) {
+            renderCheckoutSummary();
+        }
+    }
+};
 
 function buildOrderPayload() {
     const nameEl = document.getElementById('checkoutName');
@@ -1540,12 +1714,13 @@ function setupBackToTop() {
 
 document.addEventListener("DOMContentLoaded", () => {
     setupEventDelegation();
-    setupSearch();
+    MenuComponent.setup();
     setupProductModal();
     setupCheckout();
-    applyUIStrings();
+    I18n.applyUIStrings();
     initBrandLogo();
     setupStickyBar();
     setupBackToTop();
-    loadMenu();
+    initBottomNav();
+    MenuComponent.load();
 });

@@ -14,6 +14,7 @@
 
     <div class="menu-app-container">
         
+        <section id="menu-view">
         <main class="menu-content">
             <header class="menu-header">
                 <div class="brand">
@@ -85,6 +86,60 @@
                 </p>
             </footer>
         </main>
+        </section>
+
+        <!-- ── Offers View ──────────────────────────────────── -->
+        <section id="offers-view" class="view-section" hidden>
+            <div class="view-placeholder">
+                <i class="fa-solid fa-tags" aria-hidden="true"></i>
+                <h2>Offers</h2>
+                <p>Special deals and promotions coming soon.</p>
+            </div>
+        </section>
+
+        <!-- ── Cart View (mobile full-page) ─────────────────── -->
+        <section id="cart-view" class="view-section" hidden>
+            <div class="cart-view-header">
+                <div class="cart-view-title">
+                    <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
+                    <h2 data-i18n="myBasket">My Basket</h2>
+                    <span class="items-count" id="cart-view-count">0 items</span>
+                </div>
+                <button class="clear-basket-btn" onclick="clearBasket()" title="Clear All Items">
+                    <i class="fa-solid fa-trash-arrow-up"></i>
+                    <span data-i18n="clear">Clear</span>
+                </button>
+            </div>
+            <div class="cart-view-body" id="cart-view-items">
+                <div class="empty-state">
+                    <i class="fa-solid fa-cookie-bite"></i>
+                    <p>Your basket is empty.<br>Choose something delicious!</p>
+                </div>
+            </div>
+            <div class="cart-view-footer">
+                <div class="summary-row">
+                    <span data-i18n="subtotal">Subtotal</span>
+                    <span id="cart-view-subtotal">$0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span data-i18n="totalAmount">Total Amount</span>
+                    <span id="cart-view-total">$0.00</span>
+                </div>
+                <button class="order-now-btn" id="cart-view-order-btn" type="button" onclick="openCheckoutModal()">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span data-i18n="orderNow">Order Now</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ── Orders View ──────────────────────────────────── -->
+        <section id="orders-view" class="view-section" hidden>
+            <div class="view-placeholder">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+                <h2>Orders</h2>
+                <p>Your order history will appear here.</p>
+            </div>
+        </section>
 
         <aside class="cart-sidebar" id="cartSidebar">
             <div class="cart-header">
@@ -235,6 +290,29 @@
 
     <!-- Toast Notification Container -->
     <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <!-- ── Mobile Bottom Navigation Bar ─────────────────────── -->
+    <nav id="bottom-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-tab active" data-view="menu" aria-current="page">
+            <span class="nav-icon"><i class="fa-solid fa-utensils" aria-hidden="true"></i></span>
+            <span class="nav-label">Menu</span>
+        </button>
+        <button class="nav-tab" data-view="offers">
+            <span class="nav-icon"><i class="fa-solid fa-tags" aria-hidden="true"></i></span>
+            <span class="nav-label">Offers</span>
+        </button>
+        <button class="nav-tab" data-view="cart" aria-label="Cart, 0 items">
+            <span class="nav-icon-wrap">
+                <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
+                <span id="bottom-nav-cart-badge" class="nav-badge" hidden>0</span>
+            </span>
+            <span class="nav-label">Cart</span>
+        </button>
+        <button class="nav-tab" data-view="orders">
+            <span class="nav-icon"><i class="fa-solid fa-receipt" aria-hidden="true"></i></span>
+            <span class="nav-label">Orders</span>
+        </button>
+    </nav>
 
     <script src="script.js"></script>
 </body>
