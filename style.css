@@ -1955,6 +1955,58 @@ body.product-modal-open {
     }
 }
 
+/* ─── Floating Cart Bar ──────────────────────────────────────────────────────── */
+
+.floating-cart-bar {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .floating-cart-bar {
+        display: flex;
+        position: fixed;
+        bottom: var(--bottom-nav-height);
+        left: 12px;
+        right: 12px;
+        background: var(--primary-red);
+        color: var(--surface-white);
+        border-radius: 30px;
+        padding: 14px 20px;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1099;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+        transform: translateY(calc(100% + var(--bottom-nav-height)));
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    .floating-cart-bar.visible {
+        transform: translateY(0);
+    }
+
+    .floating-cart-bar-inner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .floating-cart-bar-count {
+        font-weight: 700;
+        opacity: 0.85;
+    }
+
+    .floating-cart-bar-total {
+        font-weight: 800;
+        font-size: 1rem;
+    }
+}
+
 /* ─── Mobile Bottom Navigation Bar ──────────────────────────────────────────── */
 
 #bottom-nav {

@@ -69,6 +69,7 @@ const UI_STRINGS = {
         cartAddedCheckout: 'Go to Checkout',
         specialNotes: 'Special Notes',
         specialNotesPlaceholder: 'Allergies, remove ingredients, extra sauce…',
+        viewBasket: 'View Basket',
     },
     ar: {
         menuTitle: 'قائمتنا ',
@@ -133,6 +134,7 @@ const UI_STRINGS = {
         cartAddedCheckout: 'إتمام الطلب',
         specialNotes: 'ملاحظات خاصة',
         specialNotesPlaceholder: 'حساسية، إزالة مكونات، صلصة إضافية…',
+        viewBasket: 'عرض السلة',
     }
 };
 
@@ -1203,6 +1205,8 @@ function updateBasketUI() {
     totalText.innerText            = `$${totalAmount.toFixed(2)}`;
     if (cvSubtotal) cvSubtotal.innerText = `$${totalAmount.toFixed(2)}`;
     if (cvTotal)    cvTotal.innerText    = `$${totalAmount.toFixed(2)}`;
+
+    updateFloatingCartBar();
 }
 
 const BasketComponent = {
@@ -1214,6 +1218,25 @@ const BasketComponent = {
     getTotal() { return getBasketTotal(); },
     togglePanel(isOpen) { toggleCartPanel(isOpen); }
 };
+
+function updateFloatingCartBar() {
+    const bar = document.getElementById('floatingCartBar');
+    if (!bar) return;
+    const countEl = document.getElementById('floatingCartCount');
+    const totalEl = document.getElementById('floatingCartTotal');
+    const total = getBasketTotal();
+    const count = basket.reduce((s, i) => s + i.quantity, 0);
+
+    if (basket.length === 0) {
+        bar.classList.remove('visible');
+        bar.addEventListener('transitionend', () => { bar.hidden = true; }, { once: true });
+    } else {
+        bar.hidden = false;
+        requestAnimationFrame(() => bar.classList.add('visible'));
+        if (countEl) countEl.textContent = `(${count})`;
+        if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
+    }
+}
 
 // ─── Product Detail Modal ────────────────────────────────────────────────────
 
@@ -1749,4 +1772,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupBackToTop();
     initBottomNav();
     MenuComponent.load();
+
+    document.getElementById('floatingCartBar')?.addEventListener('click', () => {
+        switchView('cart');
+    });
 });

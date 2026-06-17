@@ -294,6 +294,16 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
+    <!-- ── Floating Cart Bar ─────────────────────────────────── -->
+    <div id="floatingCartBar" class="floating-cart-bar" hidden aria-live="polite">
+        <div class="floating-cart-bar-inner">
+            <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
+            <span class="floating-cart-bar-label" data-i18n="viewBasket">View Basket</span>
+            <span id="floatingCartCount" class="floating-cart-bar-count"></span>
+        </div>
+        <span id="floatingCartTotal" class="floating-cart-bar-total"></span>
+    </div>
+
     <!-- ── Mobile Bottom Navigation Bar ─────────────────────── -->
     <nav id="bottom-nav" role="navigation" aria-label="Main navigation">
         <button class="nav-tab active" data-view="menu" aria-current="page">
