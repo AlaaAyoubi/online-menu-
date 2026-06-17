@@ -1219,23 +1219,38 @@ const BasketComponent = {
     togglePanel(isOpen) { toggleCartPanel(isOpen); }
 };
 
+let _floatingCartTimer = null;
+const FLOATING_CART_DURATION = 4000;
+
+function hideFloatingCartBar() {
+    const bar = document.getElementById('floatingCartBar');
+    if (!bar) return;
+    bar.classList.remove('visible');
+    bar.addEventListener('transitionend', () => { bar.hidden = true; }, { once: true });
+}
+
 function updateFloatingCartBar() {
     const bar = document.getElementById('floatingCartBar');
     if (!bar) return;
     const countEl = document.getElementById('floatingCartCount');
     const totalEl = document.getElementById('floatingCartTotal');
-    const total = getBasketTotal();
-    const count = basket.reduce((s, i) => s + i.quantity, 0);
+
+    clearTimeout(_floatingCartTimer);
 
     if (basket.length === 0) {
-        bar.classList.remove('visible');
-        bar.addEventListener('transitionend', () => { bar.hidden = true; }, { once: true });
-    } else {
-        bar.hidden = false;
-        requestAnimationFrame(() => bar.classList.add('visible'));
-        if (countEl) countEl.textContent = `(${count})`;
-        if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
+        hideFloatingCartBar();
+        return;
     }
+
+    const count = basket.reduce((s, i) => s + i.quantity, 0);
+    const total = getBasketTotal();
+    if (countEl) countEl.textContent = `(${count})`;
+    if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
+
+    bar.hidden = false;
+    requestAnimationFrame(() => bar.classList.add('visible'));
+
+    _floatingCartTimer = setTimeout(hideFloatingCartBar, FLOATING_CART_DURATION);
 }
 
 // ─── Product Detail Modal ────────────────────────────────────────────────────
@@ -1774,6 +1789,8 @@ document.addEventListener("DOMContentLoaded", () => {
     MenuComponent.load();
 
     document.getElementById('floatingCartBar')?.addEventListener('click', () => {
+        clearTimeout(_floatingCartTimer);
+        hideFloatingCartBar();
         switchView('cart');
     });
 });
