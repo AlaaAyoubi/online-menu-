@@ -241,6 +241,13 @@
                 <p id="productModalDescription" class="product-modal-description" hidden></p>
                 <div id="productModalModifiers" class="product-modal-modifiers"></div>
                 <p id="productModalModifierError" class="modifier-error" hidden></p>
+                <div class="product-special-notes">
+                    <label class="product-notes-label" for="productModalNotes" data-i18n="specialNotes">Special Notes</label>
+                    <textarea id="productModalNotes" class="product-notes-textarea" rows="2"
+                              data-i18n-placeholder="specialNotesPlaceholder"></textarea>
+                </div>
+            </div>
+            <footer class="product-modal-footer">
                 <div class="product-qty-row">
                     <span class="product-qty-label" data-i18n="quantity">Quantity</span>
                     <div class="product-qty-controls">
@@ -249,8 +256,6 @@
                         <button type="button" class="product-qty-btn icon-circle-btn" data-action="product-qty-increase" aria-label="Increase quantity"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                     </div>
                 </div>
-            </div>
-            <footer class="product-modal-footer">
                 <button type="button" class="product-add-btn" data-action="product-add-to-cart">
                     <i class="fa-solid fa-cart-plus"></i>
                     <span data-i18n="addToCart">Add to Cart</span><span id="productModalAddPrice" class="product-add-price"></span>

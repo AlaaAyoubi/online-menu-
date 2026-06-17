@@ -837,9 +837,10 @@ function computeUnitPrice(product, selectedModifiers) {
     return product.price + modifierTotal;
 }
 
-function buildLineKey(productId, selectedModifiers) {
+function buildLineKey(productId, selectedModifiers, notes = '') {
     const modIds = selectedModifiers.map(m => m.modifierId).sort().join(',');
-    return `${productId}|${modIds}`;
+    const notesKey = notes.replace(/\s+/g, ' ').toLowerCase();
+    return `${productId}|${modIds}|${notesKey}`;
 }
 
 function groupModifiers(selectedModifiers) {
@@ -1037,12 +1038,12 @@ function updateProductModalPriceDisplay() {
 
 // ─── Basket Logic ────────────────────────────────────────────────────────────
 
-function addToBasket(productId, qty = 1, selectedModifiers = []) {
+function addToBasket(productId, qty = 1, selectedModifiers = [], notes = '') {
     const product = mockMenuData.find(p => p.id === productId);
     if (!product) return;
 
     const unitPrice = computeUnitPrice(product, selectedModifiers);
-    const lineKey = buildLineKey(productId, selectedModifiers);
+    const lineKey = buildLineKey(productId, selectedModifiers, notes);
     const existing = basket.find(item => item.lineKey === lineKey);
 
     if (existing) {
@@ -1056,6 +1057,7 @@ function addToBasket(productId, qty = 1, selectedModifiers = []) {
             unitPrice,
             price: unitPrice,
             quantity: qty,
+            notes,
             translations: product.translations,
             image: product.image,
             category: product.category,
@@ -1279,6 +1281,8 @@ const ProductModalComponent = {
             descEl.textContent = '';
             descEl.hidden = true;
         }
+        const notesEl = document.getElementById('productModalNotes');
+        if (notesEl) notesEl.value = '';
         updateBackToTopButton();
     }
 };
@@ -1309,7 +1313,8 @@ function addProductModalToBasket() {
     }
 
     const selectedModifiers = getSelectedModifiers(product);
-    addToBasket(productModalId, productModalQty, selectedModifiers);
+    const notes = document.getElementById('productModalNotes')?.value.trim() || '';
+    addToBasket(productModalId, productModalQty, selectedModifiers, notes);
     closeProductModal();
 }
 

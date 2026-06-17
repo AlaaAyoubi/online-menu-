@@ -1265,10 +1265,12 @@ body.product-modal-open {
 }
 
 .product-modal-body {
+    flex: 1;
     padding: 0 24px 20px;
     text-align: center;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .product-modal-image {
@@ -1319,13 +1321,44 @@ body.product-modal-open {
 .product-modal-modifiers {
     text-align: start;
     margin-bottom: 16px;
-    max-height: 240px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 .product-modal-modifiers[hidden] {
     display: none;
+}
+
+.product-special-notes {
+    text-align: start;
+    margin-bottom: 16px;
+}
+
+.product-notes-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.product-notes-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    background: var(--bg-cream);
+    border: none;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--text-main);
+    resize: vertical;
+    min-height: 64px;
+    line-height: 1.5;
+    outline: none;
+    transition: box-shadow 0.2s;
+}
+
+.product-notes-textarea:focus {
+    box-shadow: 0 0 0 2px var(--primary-red);
 }
 
 .modifier-group {
@@ -1446,7 +1479,8 @@ body.product-modal-open {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    margin-bottom: 20px;
+    padding: 12px 0;
+    margin-bottom: 12px;
 }
 
 .product-qty-label {
@@ -1511,6 +1545,7 @@ body.product-modal-open {
     padding: 0 24px 24px;
     padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     flex-shrink: 0;
+    border-top: 1px solid var(--bg-cream);
 }
 
 [dir="rtl"] .product-qty-row {
