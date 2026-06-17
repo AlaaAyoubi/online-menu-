@@ -1,0 +1,23 @@
+<header class="menu-header">
+    <div class="brand">
+        <div class="brand-logo">
+            <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
+                 onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
+            <div class="brand-wordmark" id="brandWordmark" hidden>
+                <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
+            </div>
+        </div>
+        <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
+        <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
+    </div>
+
+    <div class="header-actions">
+        <button class="lang-toggle-btn" id="langToggleBtn" onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')" aria-label="Switch Language">
+            <span id="langLabel">AR</span>
+        </button>
+        <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span class="header-cart-badge" id="header-cart-count">0</span>
+        </button>
+    </div>
+</header>

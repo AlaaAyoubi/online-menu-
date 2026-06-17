@@ -1,0 +1,21 @@
+<!-- Cart Added Confirmation Modal -->
+<div class="cart-added-overlay" id="cartAddedOverlay" data-action="close-cart-added" aria-hidden="true"></div>
+<div class="cart-added-modal" id="cartAddedModal" role="dialog" aria-labelledby="cartAddedTitle" aria-modal="true" aria-hidden="true">
+    <div class="cart-added-modal-inner">
+        <div class="cart-added-icon-wrap">
+            <i class="fa-solid fa-circle-check cart-added-icon"></i>
+        </div>
+        <h2 id="cartAddedTitle" class="cart-added-title" data-i18n="cartAddedTitle">Great choice!</h2>
+        <p class="cart-added-body" data-i18n="cartAddedBody">Your item has been added to the basket.</p>
+        <div class="cart-added-actions">
+            <button type="button" class="cart-added-btn cart-added-btn--secondary" data-action="cart-added-continue">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                <span data-i18n="cartAddedContinue">Continue Browsing</span>
+            </button>
+            <button type="button" class="cart-added-btn cart-added-btn--primary" data-action="cart-added-checkout">
+                <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+                <span data-i18n="cartAddedCheckout">Go to Checkout</span>
+            </button>
+        </div>
+    </div>
+</div>

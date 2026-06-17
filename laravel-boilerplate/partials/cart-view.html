@@ -1,0 +1,34 @@
+<!-- ── Cart View (mobile full-page) ─────────────────── -->
+<section id="cart-view" class="view-section" hidden>
+    <div class="cart-view-header">
+        <div class="cart-view-title">
+            <i class="fa-solid fa-basket-shopping" aria-hidden="true"></i>
+            <h2 data-i18n="myBasket">My Basket</h2>
+            <span class="items-count" id="cart-view-count">0 items</span>
+        </div>
+        <button class="clear-basket-btn" onclick="clearBasket()" title="Clear All Items">
+            <i class="fa-solid fa-trash-arrow-up"></i>
+            <span data-i18n="clear">Clear</span>
+        </button>
+    </div>
+    <div class="cart-view-body" id="cart-view-items">
+        <div class="empty-state">
+            <i class="fa-solid fa-cookie-bite"></i>
+            <p>Your basket is empty.<br>Choose something delicious!</p>
+        </div>
+    </div>
+    <div class="cart-view-footer">
+        <div class="summary-row">
+            <span data-i18n="subtotal">Subtotal</span>
+            <span id="cart-view-subtotal">$0.00</span>
+        </div>
+        <div class="summary-row total">
+            <span data-i18n="totalAmount">Total Amount</span>
+            <span id="cart-view-total">$0.00</span>
+        </div>
+        <button class="order-now-btn" id="cart-view-order-btn" type="button" onclick="openCheckoutModal()">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span data-i18n="orderNow">Order Now</span>
+        </button>
+    </div>
+</section>

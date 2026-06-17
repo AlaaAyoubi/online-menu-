@@ -1,0 +1,43 @@
+<div class="checkout-overlay" id="checkoutOverlay" data-action="close-checkout" aria-hidden="true"></div>
+<div class="checkout-modal" id="checkoutModal" role="dialog" aria-labelledby="checkoutTitle" aria-hidden="true">
+    <div class="checkout-modal-inner">
+        <header class="checkout-header">
+            <h2 id="checkoutTitle" data-i18n="checkoutTitle">Complete Your Order</h2>
+            <button type="button" class="checkout-close-btn" data-action="close-checkout" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <div class="checkout-body">
+            <h3 class="checkout-summary-title" data-i18n="checkoutSummary">Order Summary</h3>
+            <div id="checkoutSummary" class="checkout-summary-list"></div>
+
+            <form id="checkoutForm" class="checkout-form" novalidate>
+                <label class="checkout-field">
+                    <span data-i18n="checkoutName">Full Name</span>
+                    <input type="text" id="checkoutName" name="name" autocomplete="name" required>
+                </label>
+                <label class="checkout-field">
+                    <span data-i18n="checkoutPhone">Phone Number</span>
+                    <input type="tel" id="checkoutPhone" name="phone" autocomplete="tel" required>
+                </label>
+                <label class="checkout-field">
+                    <span data-i18n="checkoutNotes">Notes (optional)</span>
+                    <textarea id="checkoutNotes" name="notes" rows="2" data-i18n-placeholder="checkoutNotesPlaceholder"></textarea>
+                </label>
+            </form>
+
+            <p id="checkoutError" class="checkout-error" hidden></p>
+            <p id="checkoutSuccess" class="checkout-success" hidden data-i18n="checkoutSuccess">Order placed successfully! Thank you.</p>
+        </div>
+
+        <footer class="checkout-footer">
+            <button type="button" class="checkout-cancel-btn" data-action="close-checkout">
+                <span data-i18n="checkoutCancel">Cancel</span>
+            </button>
+            <button type="button" class="checkout-submit-btn" id="checkoutSubmitBtn" data-action="submit-order">
+                <span data-i18n="checkoutSubmit">Submit Order</span>
+            </button>
+        </footer>
+    </div>
+</div>

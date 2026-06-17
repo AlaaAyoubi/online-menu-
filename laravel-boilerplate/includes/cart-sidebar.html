@@ -1,0 +1,39 @@
+<aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <div class="cart-title">
+            <h3><i class="fa-solid fa-basket-shopping"></i> <span data-i18n="myBasket">My Basket</span></h3>
+            <span class="items-count" id="cart-count">0 items</span>
+        </div>
+        <div class="cart-header-actions">
+            <button class="clear-basket-btn" onclick="clearBasket()" title="Clear All Items">
+                <i class="fa-solid fa-trash-arrow-up"></i> <span data-i18n="clear">Clear</span>
+            </button>
+            <button class="close-cart-btn" onclick="toggleCartPanel(false)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="cart-body" id="cart-items-wrapper">
+        <div class="empty-state">
+            <i class="fa-solid fa-cookie-bite"></i>
+            <p>Your basket is empty.<br>Choose something delicious!</p>
+        </div>
+    </div>
+
+    <div class="cart-footer">
+        <div class="summary-row">
+            <span data-i18n="subtotal">Subtotal</span>
+            <span id="subtotal-price">$0.00</span>
+        </div>
+        <div class="summary-row total">
+            <span data-i18n="totalAmount">Total Amount</span>
+            <span id="total-price">$0.00</span>
+        </div>
+        <button class="order-now-btn" id="orderNowBtn" type="button">
+            <i class="fa-solid fa-bag-shopping"></i> <span data-i18n="orderNow">Order Now</span>
+        </button>
+    </div>
+</aside>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCartPanel(false)"></div>
