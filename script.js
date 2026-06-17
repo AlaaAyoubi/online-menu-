@@ -1546,17 +1546,20 @@ function validateCheckoutForm() {
     if (!name) {
         errorEl.textContent = t('checkoutNameRequired');
         errorEl.hidden = false;
+        showToast(t('checkoutNameRequired'), 'error');
         return false;
     }
     if (!phone) {
         errorEl.textContent = t('checkoutPhoneRequired');
         errorEl.hidden = false;
+        showToast(t('checkoutPhoneRequired'), 'error');
         return false;
     }
     const phoneDigits = phone.replace(/\D/g, '');
     if (phoneDigits.length < 7) {
         errorEl.textContent = t('checkoutPhoneInvalid');
         errorEl.hidden = false;
+        showToast(t('checkoutPhoneInvalid'), 'error');
         return false;
     }
     errorEl.hidden = true;
