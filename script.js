@@ -66,7 +66,9 @@ const UI_STRINGS = {
         cartAddedTitle: 'Great choice!',
         cartAddedBody: 'Your item has been added to the basket.',
         cartAddedContinue: 'Continue Browsing',
-        cartAddedCheckout: 'Go to Checkout'
+        cartAddedCheckout: 'Go to Checkout',
+        specialNotes: 'Special Notes',
+        specialNotesPlaceholder: 'Allergies, remove ingredients, extra sauce…',
     },
     ar: {
         menuTitle: 'قائمتنا ',
@@ -128,7 +130,9 @@ const UI_STRINGS = {
         cartAddedTitle: 'اختيار رائع!',
         cartAddedBody: 'تمت إضافة الصنف إلى سلتك.',
         cartAddedContinue: 'متابعة التصفح',
-        cartAddedCheckout: 'إتمام الطلب'
+        cartAddedCheckout: 'إتمام الطلب',
+        specialNotes: 'ملاحظات خاصة',
+        specialNotesPlaceholder: 'حساسية، إزالة مكونات، صلصة إضافية…',
     }
 };
 
