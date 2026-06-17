@@ -1470,6 +1470,30 @@ body.product-modal-open {
     opacity: 0.75;
 }
 
+.cart-row-notes {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 2px 0 4px;
+    line-height: 1.4;
+    padding: 4px 8px;
+    background: var(--bg-cream);
+    border-radius: 6px;
+    border-inline-start: 2px solid var(--primary-red);
+}
+
+.checkout-summary-notes {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 3px;
+    padding: 3px 7px;
+    background: var(--bg-cream);
+    border-radius: 5px;
+    border-inline-start: 2px solid var(--primary-red);
+}
+
 .product-add-price {
     font-weight: 800;
 }

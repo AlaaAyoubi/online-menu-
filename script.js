@@ -136,6 +136,15 @@ const UI_STRINGS = {
     }
 };
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 const I18n = {
     get lang() { return ACTIVE_LANG; },
 
@@ -1109,12 +1118,16 @@ function buildCartRowsHTML() {
         const removeLine = removals.length
             ? `<span class="cart-row-modifiers cart-row-modifiers--remove">${t('without')}: ${removals.map(m => m.label).join(', ')}</span>`
             : '';
+        const notesHtml = item.notes
+            ? `<span class="cart-row-notes">${escapeHtml(item.notes)}</span>`
+            : '';
         return `
         <div class="cart-row">
             <div class="cart-row-details">
                 <strong>${label}</strong>
                 ${addLine}
                 ${removeLine}
+                ${notesHtml}
                 <span>$${item.price.toFixed(2)} × ${item.quantity}</span>
             </div>
             <div class="qty-controls">
@@ -1366,9 +1379,12 @@ function renderCheckoutSummary() {
         const addLine  = additions.length ? `<small class="checkout-summary-mods checkout-summary-mods--add">+ ${additions.map(m => m.label).join(', ')}</small>` : '';
         const remLine  = removals.length  ? `<small class="checkout-summary-mods checkout-summary-mods--remove">${t('without')}: ${removals.map(m => m.label).join(', ')}</small>` : '';
         const modsHtml = (addLine || remLine) ? `<br>${addLine}${remLine ? (addLine ? '<br>' : '') + remLine : ''}` : '';
+        const notesHtml = item.notes
+            ? `<br><small class="checkout-summary-notes">${escapeHtml(item.notes)}</small>`
+            : '';
         const lineTotal = (item.price * item.quantity).toFixed(2);
         return `<div class="checkout-summary-row">
-            <span>${label} × ${item.quantity}${modsHtml}</span>
+            <span>${label} × ${item.quantity}${modsHtml}${notesHtml}</span>
             <span>$${lineTotal}</span>
         </div>`;
     }).join('');
@@ -1408,6 +1424,7 @@ function buildOrderPayload() {
             unitPrice: item.unitPrice,
             price: item.price,
             title: item.translations[ACTIVE_LANG] || item.translations.en,
+            notes: item.notes || '',
             modifiers: (item.selectedModifiers || []).map(m => ({
                 templateId: m.templateId,
                 modifierId: m.modifierId,
