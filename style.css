@@ -2196,3 +2196,74 @@ body.product-modal-open {
         margin-top: 8px;
     }
 }
+
+/* ── Desktop Navigation Tab Bar ─────────────────────────────────────────────
+   Visible on desktop only. Hidden on all touch/mobile breakpoints via the
+   media query at the bottom of this block. Mirrors the mobile bottom nav's
+   view-switching behaviour but lives as a persistent sticky bar at page top.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.dmenu-desktop-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--surface-white);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    padding: 0 32px;
+    max-width: 1300px;
+    margin: 0 auto;
+    border-radius: 0 0 20px 20px;
+}
+
+.dmenu-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 22px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: color 0.18s ease, border-color 0.18s ease;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dmenu-tab:hover {
+    color: var(--text-main);
+}
+
+.dmenu-tab--active {
+    color: var(--primary-red);
+    border-bottom-color: var(--primary-red);
+}
+
+.dmenu-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--primary-red);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-left: 2px;
+}
+
+/* Hide desktop nav on all breakpoints where the mobile bottom nav is active */
+@media (max-width: 1024px) {
+    .dmenu-desktop-tabs {
+        display: none !important;
+    }
+}

@@ -12,6 +12,23 @@
 </head>
 <body>
 
+    <!-- ── Desktop Navigation Tab Bar (hidden on mobile via CSS) ────────── -->
+    <nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
+        <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
+            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+            <span>Menu</span>
+        </button>
+        <button class="dmenu-tab" data-view="offers">
+            <i class="fa-solid fa-tags" aria-hidden="true"></i>
+            <span>Offers</span>
+            <span class="dmenu-badge">Hot</span>
+        </button>
+        <button class="dmenu-tab" data-view="orders">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            <span>My Orders</span>
+        </button>
+    </nav>
+
     <div class="menu-app-container">
         
         <main id="menu-view" class="menu-content">

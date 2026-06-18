@@ -687,34 +687,51 @@ function toggleCartPanel(isOpen) {
     updateBackToTopButton();
 }
 
-// ─── Bottom Navigation Bar ───────────────────────────────────────────────────
+// ─── Navigation (Bottom Nav + Desktop Tab Bar) ───────────────────────────────
 
-const BOTTOM_NAV_VIEWS = ['menu', 'offers', 'cart', 'orders'];
+// All routable SPA views. Renamed from BOTTOM_NAV_VIEWS to reflect that both
+// the mobile bottom nav and the desktop tab bar share the same view set.
+const APP_VIEWS = ['menu', 'offers', 'cart', 'orders'];
 
+/**
+ * Unified view-switcher used by BOTH the mobile bottom nav and the desktop
+ * tab bar. On desktop the 'cart' view is intentionally skipped — cart
+ * interaction stays in the sidebar drawer.
+ */
 function switchView(viewName) {
-    // Guard: no-op when the bottom nav is not rendered (desktop)
-    const nav = document.getElementById('bottom-nav');
-    if (!nav || getComputedStyle(nav).display === 'none') return;
+    const bottomNav  = document.getElementById('bottom-nav');
+    const isDesktop  = !bottomNav || getComputedStyle(bottomNav).display === 'none';
 
-    BOTTOM_NAV_VIEWS.forEach(v => {
-        const view = document.getElementById(`${v}-view`);
-        if (view) view.hidden = v !== viewName;
+    // On desktop, cart is handled by the sidebar drawer — skip view toggle.
+    if (isDesktop && viewName === 'cart') return;
+
+    // Show the requested view, hide all others.
+    APP_VIEWS.forEach(v => {
+        const el = document.getElementById(`${v}-view`);
+        if (el) el.hidden = v !== viewName;
     });
 
-    nav.querySelectorAll('.nav-tab').forEach(tab => {
-        const isActive = tab.dataset.view === viewName;
-        tab.classList.toggle('active', isActive);
-        if (isActive) {
-            tab.setAttribute('aria-current', 'page');
-        } else {
-            tab.removeAttribute('aria-current');
-        }
+    // Sync mobile bottom nav active state.
+    if (bottomNav) {
+        bottomNav.querySelectorAll('.nav-tab').forEach(tab => {
+            const active = tab.dataset.view === viewName;
+            tab.classList.toggle('active', active);
+            active ? tab.setAttribute('aria-current', 'page') : tab.removeAttribute('aria-current');
+        });
+    }
+
+    // Sync desktop nav active state.
+    document.querySelectorAll('.dmenu-desktop-tabs .dmenu-tab').forEach(tab => {
+        const active = tab.dataset.view === viewName;
+        tab.classList.toggle('dmenu-tab--active', active);
+        active ? tab.setAttribute('aria-current', 'page') : tab.removeAttribute('aria-current');
     });
 
-    // Close the sidebar drawer if navigating away from cart context
+    // Close the sidebar drawer unless the user is going to cart.
     if (viewName !== 'cart') toggleCartPanel(false);
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Instant scroll — no smooth behaviour for snappier desktop feel.
+    window.scrollTo({ top: 0 });
 }
 
 function initBottomNav() {
@@ -729,21 +746,7 @@ function initBottomNav() {
         });
     });
 
-    // Hardware/browser back-button support
-    window.addEventListener('popstate', (e) => {
-        const viewName = e.state?.view ?? 'menu';
-        switchView(viewName);
-    });
-
-    // Restore view from URL hash on initial load (e.g. shared links, refresh)
-    const hashView = location.hash.slice(1);
-    if (BOTTOM_NAV_VIEWS.includes(hashView)) {
-        switchView(hashView);
-        // Replace rather than push so back-button exits the app cleanly
-        history.replaceState({ view: hashView }, '', `#${hashView}`);
-    }
-
-    // Wire up the cart-view items delegation
+    // Wire up the cart-view items delegation.
     const cartViewItems = document.getElementById('cart-view-items');
     if (cartViewItems) {
         cartViewItems.addEventListener('click', (e) => {
@@ -754,6 +757,36 @@ function initBottomNav() {
             if (btn.dataset.action === 'qty-decrease') changeQuantity(lineKey, -1);
             if (btn.dataset.action === 'remove-item')  removeFromBasket(lineKey);
         });
+    }
+}
+
+/**
+ * Initialises the desktop tab bar. Attaches click listeners, pushes history
+ * state, and handles browser back/forward + deep-link URL hashes — mirroring
+ * the same SPA routing behaviour as the mobile bottom nav.
+ */
+function initDesktopNav() {
+    const nav = document.querySelector('.dmenu-desktop-tabs');
+    if (!nav) return;
+
+    nav.querySelectorAll('.dmenu-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const viewName = tab.dataset.view;
+            switchView(viewName);
+            history.pushState({ view: viewName }, '', `#${viewName}`);
+        });
+    });
+
+    // Hardware/browser back-forward button support (shared with mobile nav).
+    window.addEventListener('popstate', (e) => {
+        switchView(e.state?.view ?? 'menu');
+    });
+
+    // Restore view from URL hash on initial load (e.g. shared links, refresh).
+    const hashView = location.hash.slice(1);
+    if (APP_VIEWS.includes(hashView)) {
+        switchView(hashView);
+        history.replaceState({ view: hashView }, '', `#${hashView}`);
     }
 }
 
@@ -1789,6 +1822,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupStickyBar();
     setupBackToTop();
     initBottomNav();
+    initDesktopNav();
     MenuComponent.load();
 
     document.getElementById('floatingCartBar')?.addEventListener('click', () => {

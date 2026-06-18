@@ -1,0 +1,20 @@
+{{-- Desktop Navigation Tab Bar
+     Rendered at the layout level (layouts/main.html), outside .menu-app-container,
+     so it persists regardless of which SPA view is currently active.
+     Hidden on mobile/tablet via CSS: @media (max-width: 1024px).
+--}}
+<nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
+    <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
+        <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+        <span>Menu</span>
+    </button>
+    <button class="dmenu-tab" data-view="offers">
+        <i class="fa-solid fa-tags" aria-hidden="true"></i>
+        <span>Offers</span>
+        <span class="dmenu-badge">Hot</span>
+    </button>
+    <button class="dmenu-tab" data-view="orders">
+        <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+        <span>My Orders</span>
+    </button>
+</nav>
