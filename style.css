@@ -184,12 +184,9 @@ body {
     border-color: rgba(255, 70, 70, 0.12);
 }
 
-.menu-sticky-bar .menu-search {
+.categories-row {
+    margin-top: 16px;
     margin-bottom: 12px;
-}
-
-.menu-sticky-bar .categories-nav {
-    padding-bottom: 4px;
 }
 
 .menu-search {
@@ -2203,13 +2200,13 @@ body.product-modal-open {
    view-switching behaviour but lives as a persistent sticky bar at page top.
    ───────────────────────────────────────────────────────────────────────── */
 
-.dmenu-desktop-tabs {
+.dmenu-nav-wrapper {
     position: sticky;
     top: 0;
     z-index: 200;
     display: flex;
-    align-items: stretch;
-    gap: 0;
+    align-items: center;
+    gap: 24px;
     background: var(--surface-white);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
     /* Break out of body's 20px padding so the bar spans the full viewport width */
@@ -2217,6 +2214,19 @@ body.product-modal-open {
     /* 20px restores escaped body padding; 32px adds inner breathing room */
     padding: 0 52px;
     border-radius: 0 0 20px 20px;
+}
+
+.dmenu-desktop-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    flex: 1;
+}
+
+.dmenu-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .dmenu-tab {
@@ -2264,7 +2274,7 @@ body.product-modal-open {
 
 /* Hide desktop nav on all breakpoints where the mobile bottom nav is active */
 @media (max-width: 1024px) {
-    .dmenu-desktop-tabs {
+    .dmenu-nav-wrapper {
         display: none !important;
     }
 }

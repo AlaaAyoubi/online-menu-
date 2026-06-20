@@ -3,18 +3,29 @@
      so it persists regardless of which SPA view is currently active.
      Hidden on mobile/tablet via CSS: @media (max-width: 1024px).
 --}}
-<nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
-    <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
-        <i class="fa-solid fa-utensils" aria-hidden="true"></i>
-        <span>Menu</span>
-    </button>
-    <button class="dmenu-tab" data-view="offers">
-        <i class="fa-solid fa-tags" aria-hidden="true"></i>
-        <span>Offers</span>
-        <span class="dmenu-badge">Hot</span>
-    </button>
-    <button class="dmenu-tab" data-view="orders">
-        <i class="fa-solid fa-receipt" aria-hidden="true"></i>
-        <span>My Orders</span>
-    </button>
-</nav>
+<div class="dmenu-nav-wrapper">
+    <nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
+        <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
+            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+            <span>Menu</span>
+        </button>
+        <button class="dmenu-tab" data-view="offers">
+            <i class="fa-solid fa-tags" aria-hidden="true"></i>
+            <span>Offers</span>
+            <span class="dmenu-badge">Hot</span>
+        </button>
+        <button class="dmenu-tab" data-view="orders">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            <span>My Orders</span>
+        </button>
+    </nav>
+    <div class="dmenu-nav-actions">
+        <button class="lang-toggle-btn" id="langToggleBtn" onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')" aria-label="Switch Language">
+            <span id="langLabel">AR</span>
+        </button>
+        <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span class="header-cart-badge" id="header-cart-count">0</span>
+        </button>
+    </div>
+</div>
