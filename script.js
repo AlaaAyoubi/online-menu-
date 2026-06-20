@@ -70,6 +70,16 @@ const UI_STRINGS = {
         specialNotes: 'Special Notes',
         specialNotesPlaceholder: 'Allergies, remove ingredients, extra sauce…',
         viewBasket: 'View Basket',
+        myOrders: 'My Orders',
+        ordersEmpty: 'Your order history will appear here.',
+        orderStatus_confirmed: 'Confirmed',
+        orderStatus_submitted: 'Submitted',
+        viewDetails: 'View Details',
+        orderDetailTitle: 'Order Details',
+        orderDate: 'Date',
+        orderCustomer: 'Customer',
+        orderItems: 'Items',
+        orderTotal: 'Total',
     },
     ar: {
         menuTitle: 'قائمتنا ',
@@ -135,7 +145,57 @@ const UI_STRINGS = {
         specialNotes: 'ملاحظات خاصة',
         specialNotesPlaceholder: 'حساسية، إزالة مكونات، صلصة إضافية…',
         viewBasket: 'عرض السلة',
+        myOrders: 'طلباتي',
+        ordersEmpty: 'ستظهر هنا سجل طلباتك.',
+        orderStatus_confirmed: 'مؤكد',
+        orderStatus_submitted: 'مُقدَّم',
+        viewDetails: 'عرض التفاصيل',
+        orderDetailTitle: 'تفاصيل الطلب',
+        orderDate: 'التاريخ',
+        orderCustomer: 'العميل',
+        orderItems: 'الأصناف',
+        orderTotal: 'الإجمالي',
     }
+};
+
+// ─── Order Service ────────────────────────────────────────────────────────────
+
+class OrderService {
+    static STORAGE_KEY = 'foodle_order_history';
+    static ORDER_STATUS = Object.freeze({ CONFIRMED: 'confirmed', SUBMITTED: 'submitted' });
+
+    static #load() {
+        try { return JSON.parse(localStorage.getItem(OrderService.STORAGE_KEY) || '[]'); }
+        catch { return []; }
+    }
+
+    static #persist(data) {
+        localStorage.setItem(OrderService.STORAGE_KEY, JSON.stringify(data));
+    }
+
+    static validateOrder(record) {
+        if (!record?.items?.length) throw new Error('Order must contain at least one item.');
+        if (!record?.customer?.name) throw new Error('Order must include customer name.');
+    }
+
+    static getAll()        { return OrderService.#load(); }
+    static findById(id)    { return OrderService.#load().find(o => o.orderId === id) ?? null; }
+
+    static save(record) {
+        OrderService.validateOrder(record);
+        const orders = OrderService.#load();
+        orders.unshift(record);
+        OrderService.#persist(orders);
+    }
+
+    static clear() { localStorage.removeItem(OrderService.STORAGE_KEY); }
+}
+
+// Maps every known status to its i18n key and CSS modifier so createStatusBadge()
+// never needs a conditional chain — add new statuses here only.
+const STATUS_META = {
+    [OrderService.ORDER_STATUS.CONFIRMED]: { i18nKey: 'orderStatus_confirmed', cssModifier: 'confirmed' },
+    [OrderService.ORDER_STATUS.SUBMITTED]: { i18nKey: 'orderStatus_submitted', cssModifier: 'submitted' },
 };
 
 function escapeHtml(str) {
@@ -710,6 +770,8 @@ function switchView(viewName) {
         const el = document.getElementById(`${v}-view`);
         if (el) el.hidden = v !== viewName;
     });
+
+    if (viewName === 'orders') renderMyOrders();
 
     // Sync mobile bottom nav active state.
     if (bottomNav) {
@@ -1617,7 +1679,16 @@ async function submitOrder() {
 
     try {
         const payload = buildOrderPayload();
-        await mockSubmitOrder(payload);
+        const result  = await mockSubmitOrder(payload);
+
+        OrderService.save({
+            orderId:    result.orderId ?? ('ORD-' + Date.now()),
+            date:       new Date().toISOString(),
+            status:     OrderService.ORDER_STATUS.CONFIRMED,
+            customer:   payload.customer,
+            items:      payload.items,
+            totalPrice: payload.total,
+        });
 
         successEl.hidden = false;
         successEl.textContent = t('checkoutSuccess');
@@ -1635,6 +1706,168 @@ async function submitOrder() {
         submitBtn.querySelector('span').textContent = t('checkoutSubmit');
         console.error('Order submit failed:', err);
     }
+}
+
+// ─── Orders View ─────────────────────────────────────────────────────────────
+
+function renderMyOrders() {
+    const container = document.getElementById('orders-list');
+    if (!container) return;
+
+    const orders = OrderService.getAll();
+
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="view-placeholder">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+                <h2>${t('myOrders')}</h2>
+                <p>${t('ordersEmpty')}</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(order => createOrderCard(order)).join('');
+}
+
+function createOrderCard(order) {
+    const locale      = ACTIVE_LANG === 'ar' ? 'ar-SA' : 'en-US';
+    const dateObj     = new Date(order.date);
+    const formattedDate = dateObj.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+    const formattedTime = dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    const itemCount   = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const countLabel  = itemCount === 1 ? t('item') : t('items');
+
+    return `<article class="order-card" data-action="view-order" data-order-id="${escapeHtml(order.orderId)}">
+        <div class="order-card-header">
+            <div class="order-card-id">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+                <span>${escapeHtml(order.orderId)}</span>
+            </div>
+            ${createStatusBadge(order.status)}
+        </div>
+        <div class="order-card-meta">
+            <span>${formattedDate} · ${formattedTime}</span>
+            <span>${itemCount} ${countLabel}</span>
+        </div>
+        <div class="order-card-footer">
+            <span class="order-card-total">$${order.totalPrice.toFixed(2)}</span>
+            <button class="order-card-detail-btn" type="button"
+                    data-action="view-order" data-order-id="${escapeHtml(order.orderId)}"
+                    aria-label="${t('viewDetails')}">
+                ${t('viewDetails')} <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+    </article>`;
+}
+
+function createStatusBadge(status) {
+    const meta  = STATUS_META[status] ?? { i18nKey: null, cssModifier: status };
+    const label = meta.i18nKey ? t(meta.i18nKey) : status;
+    return `<span class="order-status-badge order-status-badge--${escapeHtml(meta.cssModifier)}">${escapeHtml(label)}</span>`;
+}
+
+// ─── Order Detail Modal ───────────────────────────────────────────────────────
+
+function openOrderDetailModal(orderId) {
+    const order = OrderService.findById(orderId);
+    if (!order) return;
+
+    renderOrderDetail(order);
+    applyUIStrings();
+
+    const overlay = document.getElementById('orderDetailOverlay');
+    const modal   = document.getElementById('orderDetailModal');
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('order-detail-modal-open');
+}
+
+function closeOrderDetailModal() {
+    const overlay = document.getElementById('orderDetailOverlay');
+    const modal   = document.getElementById('orderDetailModal');
+    overlay.classList.remove('open');
+    modal.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('order-detail-modal-open');
+}
+
+function renderOrderDetail(order) {
+    const content = document.getElementById('orderDetailContent');
+    if (!content) return;
+    content.innerHTML =
+        renderOrderHeader(order) +
+        renderCustomerInfo(order.customer) +
+        renderOrderItems(order.items) +
+        renderOrderSummary(order.totalPrice);
+}
+
+function renderOrderHeader(order) {
+    const locale    = ACTIVE_LANG === 'ar' ? 'ar-SA' : 'en-US';
+    const dateObj   = new Date(order.date);
+    const formatted = dateObj.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+                    + ' · '
+                    + dateObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+    return `<div class="order-detail-receipt-header">
+        <div class="order-detail-receipt-id">
+            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+            <strong>${escapeHtml(order.orderId)}</strong>
+            ${createStatusBadge(order.status)}
+        </div>
+        <p class="order-detail-receipt-date">${formatted}</p>
+    </div>`;
+}
+
+function renderCustomerInfo(customer) {
+    if (!customer?.name && !customer?.phone) return '';
+    return `<div class="order-detail-receipt-section">
+        <h4 class="order-detail-receipt-section-title">${t('orderCustomer')}</h4>
+        ${customer.name  ? `<p class="order-detail-receipt-meta-row"><i class="fa-solid fa-user" aria-hidden="true"></i> ${escapeHtml(customer.name)}</p>` : ''}
+        ${customer.phone ? `<p class="order-detail-receipt-meta-row"><i class="fa-solid fa-phone" aria-hidden="true"></i> ${escapeHtml(customer.phone)}</p>` : ''}
+        ${customer.notes ? `<p class="order-detail-receipt-meta-row order-detail-receipt-customer-notes"><i class="fa-solid fa-note-sticky" aria-hidden="true"></i> ${escapeHtml(customer.notes)}</p>` : ''}
+    </div>`;
+}
+
+function renderOrderItems(items) {
+    if (!items?.length) return '';
+
+    const rows = items.map(item => {
+        const additions = (item.modifiers || []).filter(m => m.type !== 'remove');
+        const removals  = (item.modifiers || []).filter(m => m.type === 'remove');
+        const addLine   = additions.length
+            ? `<small class="checkout-summary-mods checkout-summary-mods--add">+ ${additions.map(m => escapeHtml(m.name)).join(', ')}</small>`
+            : '';
+        const remLine   = removals.length
+            ? `<small class="checkout-summary-mods checkout-summary-mods--remove">${t('without')}: ${removals.map(m => escapeHtml(m.name)).join(', ')}</small>`
+            : '';
+        const modsHtml  = (addLine || remLine)
+            ? `<span class="order-detail-mods">${addLine}${remLine ? (addLine ? '<br>' : '') + remLine : ''}</span>`
+            : '';
+        const notesHtml = item.notes
+            ? `<small class="checkout-summary-notes">${escapeHtml(item.notes)}</small>`
+            : '';
+        const lineTotal = (item.price * item.quantity).toFixed(2);
+
+        return `<div class="order-detail-receipt-row">
+            <span class="order-detail-receipt-item-name">${escapeHtml(item.title)} × ${item.quantity}${modsHtml}${notesHtml}</span>
+            <span class="order-detail-receipt-item-price">$${lineTotal}</span>
+        </div>`;
+    }).join('');
+
+    return `<div class="order-detail-receipt-section">
+        <h4 class="order-detail-receipt-section-title">${t('orderItems')}</h4>
+        <div class="order-detail-receipt-list">${rows}</div>
+    </div>`;
+}
+
+function renderOrderSummary(totalPrice) {
+    return `<div class="order-detail-receipt-total-row">
+        <span>${t('orderTotal')}</span>
+        <span>$${totalPrice.toFixed(2)}</span>
+    </div>`;
 }
 
 // ─── Cart Added Modal ─────────────────────────────────────────────────────────
@@ -1685,10 +1918,22 @@ function setupCheckout() {
             closeCartAddedModal();
             openCheckoutModal();
         }
+        if (actionEl.dataset.action === 'view-order') {
+            openOrderDetailModal(actionEl.dataset.orderId);
+        }
+        if (actionEl.dataset.action === 'close-order-detail') {
+            closeOrderDetailModal();
+        }
     });
+
+    document.getElementById('orderDetailOverlay')?.addEventListener('click', closeOrderDetailModal);
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
+        if (document.getElementById('orderDetailModal')?.classList.contains('open')) {
+            closeOrderDetailModal();
+            return;
+        }
         if (document.getElementById('cartAddedModal').classList.contains('open')) {
             closeCartAddedModal();
             return;
@@ -1762,7 +2007,8 @@ function isOverlayOpen() {
     return document.getElementById('cartOverlay')?.classList.contains('open')
         || document.getElementById('checkoutModal')?.classList.contains('open')
         || document.getElementById('productModal')?.classList.contains('open')
-        || document.getElementById('cartAddedModal')?.classList.contains('open');
+        || document.getElementById('cartAddedModal')?.classList.contains('open')
+        || document.getElementById('orderDetailModal')?.classList.contains('open');
 }
 
 function updateBackToTopButton() {

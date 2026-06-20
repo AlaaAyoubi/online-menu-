@@ -149,11 +149,10 @@
 
         <!-- ── Orders View ──────────────────────────────────── -->
         <section id="orders-view" class="view-section" hidden>
-            <div class="view-placeholder">
-                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
-                <h2>Orders</h2>
-                <p>Your order history will appear here.</p>
+            <div class="orders-view-header">
+                <h2 class="orders-view-title" data-i18n="myOrders">My Orders</h2>
             </div>
+            <div id="orders-list" class="orders-list"></div>
         </section>
 
         <aside class="cart-sidebar" id="cartSidebar">
@@ -304,6 +303,24 @@
                     <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
                     <span data-i18n="cartAddedCheckout">Go to Checkout</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Order Detail Modal ───────────────────────────────── -->
+    <div id="orderDetailOverlay" class="order-detail-overlay" aria-hidden="true"></div>
+    <div id="orderDetailModal" class="order-detail-modal" role="dialog" aria-modal="true"
+         aria-labelledby="orderDetailModalTitle" aria-hidden="true">
+        <div class="order-detail-modal-inner">
+            <div class="order-detail-modal-header">
+                <h3 id="orderDetailModalTitle" data-i18n="orderDetailTitle">Order Details</h3>
+                <button class="icon-circle-btn" type="button" data-action="close-order-detail"
+                        aria-label="Close">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="order-detail-modal-body">
+                <div id="orderDetailContent" class="order-detail-content"></div>
             </div>
         </div>
     </div>
