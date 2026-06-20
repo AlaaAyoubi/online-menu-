@@ -1,0 +1,17 @@
+<!-- ── Order Detail Modal ───────────────────────────────── -->
+<div id="orderDetailOverlay" class="order-detail-overlay" aria-hidden="true"></div>
+<div id="orderDetailModal" class="order-detail-modal" role="dialog" aria-modal="true"
+     aria-labelledby="orderDetailModalTitle" aria-hidden="true">
+    <div class="order-detail-modal-inner">
+        <div class="order-detail-modal-header">
+            <h3 id="orderDetailModalTitle" data-i18n="orderDetailTitle">Order Details</h3>
+            <button class="icon-circle-btn" type="button" data-action="close-order-detail"
+                    aria-label="Close">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="order-detail-modal-body">
+            <div id="orderDetailContent" class="order-detail-content"></div>
+        </div>
+    </div>
+</div>
