@@ -1254,9 +1254,15 @@ function updateBasketUI() {
     const totalItemsCount = basket.reduce((sum, item) => sum + item.quantity, 0);
     const countLabel = `${totalItemsCount} ${totalItemsCount !== 1 ? t('items') : t('item')}`;
 
-    countBadge.innerText       = countLabel;
-    headerCountBadge.innerText = totalItemsCount;
+    countBadge.innerText = countLabel;
+    if (headerCountBadge) headerCountBadge.innerText = totalItemsCount;
     if (cvCount) cvCount.innerText = countLabel;
+
+    const mobileCartBadge = document.querySelector('.mobile-cart-badge');
+    if (mobileCartBadge) {
+        mobileCartBadge.textContent = totalItemsCount;
+        mobileCartBadge.hidden = totalItemsCount === 0;
+    }
 
     // ── Bottom nav badge sync ──────────────────────────────────
     const navBadge = document.getElementById('bottom-nav-cart-badge');

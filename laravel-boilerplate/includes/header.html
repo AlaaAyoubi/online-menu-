@@ -1,5 +1,5 @@
 <header class="menu-header">
-    <div class="brand">
+    <div class="header-top-row">
         <div class="brand-logo">
             <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
                  onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
@@ -7,19 +7,22 @@
                 <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
             </div>
         </div>
+
+        <div class="header-toolbar">
+            <button class="header-action-btn lang-toggle-btn"
+                    onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
+                    aria-label="Switch Language">
+                <span class="lang-label" aria-hidden="true"></span>
+            </button>
+            <button class="header-action-btn header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span class="header-cart-badge mobile-cart-badge" hidden>0</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="brand-text">
         <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
-        <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
+        <p class="desktop-only-tagline" data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
     </div>
-
-    <div class="header-actions">
-        <button class="lang-toggle-btn"
-                onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
-                aria-label="Switch Language">
-            <span class="lang-label" aria-hidden="true"></span>
-        </button>
-        <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
-            <i class="fa-solid fa-basket-shopping"></i>
-        </button>
-    </div>
-
 </header>
