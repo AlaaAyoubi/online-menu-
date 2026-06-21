@@ -267,8 +267,10 @@ body {
 }
 
 .categories-row {
-    margin-top: 8px;
-    margin-bottom: 12px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    margin-inline: 0;
+    width: 100%;
 }
 
 .no-search-results {
@@ -341,8 +343,10 @@ body {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    padding-top: 4px;
-    padding-bottom: 8px;
+    padding-inline: 0;
+    padding-block: 6px 10px;
+    justify-content: flex-start;
+    scroll-padding-inline: 0;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
 }
@@ -353,33 +357,52 @@ body {
 
 .cat-btn {
     background: var(--surface-white);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 30px;
+    border: 2px solid transparent;
+    padding: 12px 24px;
+    border-radius: 999px;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: var(--text-main);
     cursor: pointer;
     box-shadow: var(--shadow-soft);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     white-space: nowrap;
     flex-shrink: 0;
-    transition: 0.2s;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .cat-btn i {
     color: var(--text-muted);
+    transition: color 0.25s ease;
 }
 
-.cat-btn.active, .cat-btn:hover {
-    background-color: var(--primary-red);
-    color: var(--surface-white);
+.cat-btn:hover:not(.active) {
+    background-color: rgba(255, 70, 70, 0.08);
+    border-color: rgba(255, 70, 70, 0.25);
+    color: var(--primary-red);
 }
 
-.cat-btn.active i, .cat-btn:hover i {
-    color: var(--surface-white);
+.cat-btn:hover:not(.active) i {
+    color: var(--primary-red);
+}
+
+.cat-btn.active {
+    background-color: var(--surface-white);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    box-shadow: 0 4px 14px rgba(255, 70, 70, 0.12);
+}
+
+.cat-btn.active i {
+    color: var(--primary-red);
+}
+
+.cat-btn.active:hover {
+    background-color: rgba(255, 70, 70, 0.06);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
 }
 
 /* شبكة المنتجات */
@@ -836,6 +859,11 @@ body.cart-drawer-open {
     }
     .quick-add-btn i {
         font-size: 12px;
+    }
+
+    .cat-btn {
+        padding: 10px 18px;
+        font-size: 0.88rem;
     }
 }
 
