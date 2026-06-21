@@ -11,4 +11,15 @@
         <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
     </div>
 
+    <div class="header-actions">
+        <button class="lang-toggle-btn"
+                onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
+                aria-label="Switch Language">
+            <span class="lang-label" aria-hidden="true"></span>
+        </button>
+        <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
+            <i class="fa-solid fa-basket-shopping"></i>
+        </button>
+    </div>
+
 </header>

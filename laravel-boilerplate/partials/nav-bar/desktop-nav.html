@@ -20,8 +20,10 @@
         </button>
     </nav>
     <div class="dmenu-nav-actions">
-        <button class="lang-toggle-btn" id="langToggleBtn" onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')" aria-label="Switch Language">
-            <span id="langLabel">AR</span>
+        <button class="lang-toggle-btn"
+                onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
+                aria-label="Switch Language">
+            <span class="lang-label" aria-hidden="true"></span>
         </button>
         <button class="header-cart-btn" onclick="toggleCartPanel(true)" aria-label="Open Basket">
             <i class="fa-solid fa-basket-shopping"></i>

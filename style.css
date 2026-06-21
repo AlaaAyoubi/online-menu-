@@ -922,6 +922,15 @@ body {
     color: var(--surface-white);
 }
 
+/* CSS-driven lang label — reflects current direction without JS */
+.lang-label::before             { content: "AR"; }
+[dir="rtl"] .lang-label::before { content: "EN"; }
+
+/* Hide header utility actions on desktop — dmenu-nav-actions serves that role */
+@media (min-width: 1025px) {
+    .menu-header .header-actions { display: none; }
+}
+
 /* Arabic font when lang="ar" is active on <html> */
 [lang="ar"] body {
     font-family: 'Cairo', sans-serif;
