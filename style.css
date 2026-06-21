@@ -159,12 +159,12 @@ body {
     border: 0;
 }
 
-/* Expandable icon search in the top nav */
+/* Floating dropdown search in the top nav */
 .nav-search {
     position: relative;
-    display: flex;
-    align-items: center;
     flex-shrink: 0;
+    width: 44px;
+    height: 44px;
 }
 
 .nav-search-toggle {
@@ -181,7 +181,6 @@ body {
     cursor: pointer;
     box-shadow: var(--shadow-soft);
     flex-shrink: 0;
-    transition: opacity 0.2s ease, width 0.25s ease, margin 0.25s ease, padding 0.25s ease;
 }
 
 .nav-search-toggle i {
@@ -191,12 +190,20 @@ body {
 .nav-search-panel {
     display: flex;
     align-items: center;
-    position: relative;
-    max-width: 0;
+    position: absolute;
+    top: calc(100% + 8px);
+    inset-inline-end: 0;
+    width: 320px;
+    padding: 8px;
+    background: var(--surface-white);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    z-index: var(--z-nav-search);
     opacity: 0;
-    overflow: hidden;
+    visibility: hidden;
     pointer-events: none;
-    transition: max-width 0.35s ease, opacity 0.25s ease, margin-inline-start 0.35s ease;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
 }
 
 .nav-search-input {
@@ -204,13 +211,13 @@ body {
     min-width: 0;
     padding: 10px 40px 10px 16px;
     border: none;
-    border-radius: 999px;
-    background: var(--surface-white);
-    box-shadow: var(--shadow-soft);
+    border-radius: 12px;
+    background: var(--bg-cream);
+    box-shadow: none;
     font-size: 0.88rem;
     font-family: inherit;
     color: var(--text-main);
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 [dir="rtl"] .nav-search-input,
@@ -221,7 +228,8 @@ body {
 
 .nav-search-input:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 70, 70, 0.25), var(--shadow-soft);
+    background: var(--surface-white);
+    box-shadow: 0 0 0 2px rgba(255, 70, 70, 0.25);
 }
 
 .nav-search-input::-webkit-search-cancel-button {
@@ -230,7 +238,7 @@ body {
 
 .nav-search-close {
     position: absolute;
-    inset-inline-end: 8px;
+    inset-inline-end: 16px;
     top: 50%;
     transform: translateY(-50%);
     width: 28px;
@@ -251,24 +259,11 @@ body {
     color: var(--text-main);
 }
 
-.nav-search--open .nav-search-input {
-    min-width: 220px;
-}
-
-.nav-search--open .nav-search-toggle {
-    width: 0;
-    opacity: 0;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    pointer-events: none;
-}
-
 .nav-search--open .nav-search-panel {
-    max-width: 320px;
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
-    margin-inline-start: 0;
+    transform: translateY(0);
 }
 
 .categories-row {
@@ -2435,23 +2430,31 @@ body.product-modal-open {
         top: 0;
         left: 0;
         right: 0;
-        max-width: none;
+        inset-inline-end: auto;
         width: 100%;
         height: auto;
         padding: 12px 16px;
         padding-top: calc(12px + env(safe-area-inset-top, 0px));
         background: var(--surface-white);
+        border-radius: 0;
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
         z-index: calc(var(--z-nav-top) + 10);
         opacity: 1;
+        visibility: visible;
         pointer-events: auto;
-        margin-inline-start: 0;
+        transform: none;
     }
 
     .nav-search--open .nav-search-input {
-        min-width: 0;
         width: 100%;
         padding-inline-end: 44px;
+        border-radius: 999px;
+        background: var(--surface-white);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .nav-search--open .nav-search-input:focus {
+        box-shadow: 0 0 0 2px rgba(255, 70, 70, 0.25), var(--shadow-soft);
     }
 
     .nav-search--open .nav-search-close {

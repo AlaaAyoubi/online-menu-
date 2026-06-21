@@ -714,19 +714,24 @@ function setupSearch() {
 function setupExpandableSearch() {
     const root = document.getElementById('navSearch');
     const toggle = document.getElementById('navSearchToggle');
+    const panel = document.getElementById('navSearchPanel');
     const closeBtn = document.getElementById('navSearchClose');
     const input = document.getElementById('menuSearchInput');
     if (!root || !toggle || !input) return;
 
+    panel?.setAttribute('aria-hidden', 'true');
+
     const openSearch = () => {
         root.classList.add('nav-search--open');
         toggle.setAttribute('aria-expanded', 'true');
+        panel?.setAttribute('aria-hidden', 'false');
         requestAnimationFrame(() => input.focus());
     };
 
     const closeSearch = () => {
         root.classList.remove('nav-search--open');
         toggle.setAttribute('aria-expanded', 'false');
+        panel?.setAttribute('aria-hidden', 'true');
         clearSearch(true);
     };
 
