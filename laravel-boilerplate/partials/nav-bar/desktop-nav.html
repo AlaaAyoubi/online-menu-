@@ -4,6 +4,13 @@
      Hidden on mobile/tablet via CSS: @media (max-width: 1024px).
 --}}
 <div class="dmenu-nav-wrapper">
+    <a class="dmenu-nav-brand" href="#" aria-label="Foodle">
+        <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
+             onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
+        <div class="brand-wordmark" id="brandWordmark" hidden>
+            <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
+        </div>
+    </a>
     <nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
         <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
             <i class="fa-solid fa-utensils" aria-hidden="true"></i>

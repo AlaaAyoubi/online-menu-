@@ -57,7 +57,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     gap: 15px; /* يضمن وجود مسافة آمنة بين النص والأيقونة */
 }
 
@@ -66,16 +66,7 @@ body {
     min-width: 0;
 }
 
-.brand-logo {
-    margin-bottom: 10px;
-    line-height: 0;
-}
-
 .brand-logo-img {
-    height: 44px;
-    width: auto;
-    max-width: 160px;
-    object-fit: contain;
     display: block;
 }
 
@@ -325,11 +316,6 @@ body {
 }
 
 @media (min-width: 1025px) {
-    .brand-logo-img {
-        height: 52px;
-        max-width: 200px;
-    }
-
     .menu-sticky-bar {
         top: var(--sticky-nav-height, 0px);
     }
@@ -2307,7 +2293,8 @@ body.product-modal-open {
     position: sticky;
     top: 0;
     z-index: 200;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 24px;
     background: var(--surface-white);
@@ -2319,17 +2306,39 @@ body.product-modal-open {
     border-radius: 0 0 20px 20px;
 }
 
+.dmenu-nav-brand {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    line-height: 0;
+    text-decoration: none;
+}
+
+.dmenu-nav-brand .brand-logo-img {
+    max-height: 38px;
+    height: auto;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
+}
+
+.dmenu-nav-brand .brand-wordmark-name {
+    font-size: 1.1rem;
+}
+
 .dmenu-desktop-tabs {
     display: flex;
     align-items: stretch;
     gap: 0;
-    flex: 1;
+    justify-self: center;
 }
 
 .dmenu-nav-actions {
     display: flex;
     align-items: center;
     gap: 10px;
+    justify-self: end;
 }
 
 .dmenu-tab {
@@ -2375,10 +2384,26 @@ body.product-modal-open {
     margin-left: 2px;
 }
 
-/* Hide desktop nav on all breakpoints where the mobile bottom nav is active */
+/* Mobile: logo-only strip; desktop tabs/actions live in menu-header / bottom nav */
 @media (max-width: 1024px) {
     .dmenu-nav-wrapper {
-        display: none !important;
+        display: grid !important;
+        grid-template-columns: 1fr;
+        padding: 10px 20px;
+        margin-bottom: 16px;
+    }
+
+    .dmenu-desktop-tabs,
+    .dmenu-nav-actions {
+        display: none;
+    }
+
+    .dmenu-nav-brand {
+        justify-self: start;
+    }
+
+    .dmenu-nav-brand .brand-logo-img {
+        max-height: 32px;
     }
 }
 
