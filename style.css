@@ -9,6 +9,12 @@
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.03);
     --shadow-card: 0 16px 32px rgba(255, 70, 70, 0.04);
     --bottom-nav-height: 0px;
+    --z-nav-top: 200;
+    --z-nav-search: 195;
+    --z-nav-categories: 190;
+    --z-content: 1;
+    --sticky-nav-height: 0px;
+    --sticky-search-height: 0px;
 }
 
 * {
@@ -36,8 +42,7 @@ body {
     max-width: 1300px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 380px;
-    gap: 30px;
+    grid-template-columns: 1fr;
     min-width: 0;
 }
 
@@ -169,7 +174,7 @@ body {
 .menu-sticky-bar {
     position: sticky;
     top: 0;
-    z-index: 500;
+    z-index: var(--z-nav-search);
     background: var(--surface-white);
     border-radius: 20px;
     padding: 12px 14px 10px;
@@ -324,10 +329,28 @@ body {
         height: 52px;
         max-width: 200px;
     }
+
+    .menu-sticky-bar {
+        top: var(--sticky-nav-height, 0px);
+    }
+
+    .items-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+        transition: gap 0.3s ease-in-out;
+    }
+
+    .menu-app-container.cart-open .items-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 /* شريط التصنيفات القابل للسحب باللمس */
 .categories-nav {
+    position: sticky;
+    top: calc(var(--sticky-nav-height, 0px) + var(--sticky-search-height, 0px));
+    z-index: var(--z-nav-categories);
+    background-color: var(--bg-cream);
     display: flex;
     gap: 10px;
     margin-bottom: 0;
@@ -335,6 +358,7 @@ body {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    padding-top: 4px;
     padding-bottom: 8px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
@@ -377,6 +401,8 @@ body {
 
 /* شبكة المنتجات */
 .items-grid {
+    position: relative;
+    z-index: var(--z-content);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 20px;
@@ -384,6 +410,8 @@ body {
 
 /* تصميم الكرت الدائري المستوحى من صورتك */
 .item-card {
+    position: relative;
+    z-index: var(--z-content);
     background-color: var(--surface-white);
     border-radius: 24px;
     padding: 20px;
@@ -499,19 +527,27 @@ body {
     transform: scale(0.92);
 }
 
-/* السلة الجانبية (شاشات الكمبيوتر الكبيرة) */
+/* Off-canvas cart drawer (all breakpoints) */
 .cart-sidebar {
     background-color: var(--surface-white);
-    border-radius: 28px;
+    border-radius: 28px 0 0 28px;
     padding: 25px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 40px);
-    position: sticky;
-    top: 20px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 380px;
+    max-width: 85vw;
     z-index: 1000;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.cart-sidebar.open {
+    transform: translateX(0);
 }
 
 .cart-header {
@@ -566,18 +602,33 @@ body {
 }
 
 .close-cart-btn {
-    display: none; /* مخفي في الشاشات الكبيرة */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     font-size: 1.3rem;
     cursor: pointer;
     color: var(--text-main);
+    min-width: 36px;
+    min-height: 36px;
 }
 
 .cart-body {
-    flex-grow: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     padding: 15px 0;
+}
+
+.cart-body:not(:has(.cart-row)) {
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-body:not(:has(.cart-row)) .empty-state {
+    padding-top: 0;
 }
 
 .empty-state {
@@ -727,7 +778,7 @@ body {
     opacity: 0.9;
 }
 
-/* خلفية تظليل الشاشة عند فتح السلة في الموبايل */
+/* Backdrop overlay when cart drawer is open */
 .cart-overlay {
     display: none;
     position: fixed;
@@ -735,12 +786,17 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
     z-index: 999;
 }
+
 .cart-overlay.open {
     display: block;
+}
+
+body.cart-drawer-open {
+    overflow: hidden;
 }
 
 /* ==========================================
@@ -751,34 +807,13 @@ body {
     body {
         padding: 15px;
     }
-    
-    .menu-app-container {
-        grid-template-columns: 1fr; /* تحويل الصفحة لعمود واحد كامل */
-    }
 
-    /* تحويل السلة للوحة انزلاقية جانبية ذكية (Slide-in Menu) */
     .cart-sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100vh;
         width: 340px;
-        max-width: 85vw;
         border-radius: 24px 0 0 24px;
-        transform: translateX(105%); /* مخفية تماماً خارج الشاشة في البداية */
-        box-shadow: -10px 0 40px rgba(0,0,0,0.1);
         z-index: 10000;
     }
 
-    /* فئة برمجية يتم تفعيلها عبر الـ JS لفتح السلة */
-    .cart-sidebar.open {
-        transform: translateX(0);
-    }
-
-    .close-cart-btn {
-        display: flex;
-    }
-    
     .items-grid {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 15px;
@@ -983,16 +1018,21 @@ body {
 }
 
 /* RTL: cart sidebar slides in from the left */
+[dir="rtl"] .cart-sidebar {
+    right: auto;
+    left: 0;
+    border-radius: 0 28px 28px 0;
+    box-shadow: 12px 0 48px rgba(0, 0, 0, 0.12);
+    transform: translateX(-100%);
+}
+
+[dir="rtl"] .cart-sidebar.open {
+    transform: translateX(0);
+}
+
 @media (max-width: 1024px) {
     [dir="rtl"] .cart-sidebar {
-        right: auto;
-        left: 0;
         border-radius: 0 24px 24px 0;
-        transform: translateX(-105%);
-    }
-
-    [dir="rtl"] .cart-sidebar.open {
-        transform: translateX(0);
     }
 }
 

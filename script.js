@@ -740,16 +740,25 @@ const MenuComponent = {
 
 // ─── Cart Panel ──────────────────────────────────────────────────────────────
 
-function toggleCartPanel(isOpen) {
-    const sidebar = document.getElementById("cartSidebar");
-    const overlay = document.getElementById("cartOverlay");
-    if (isOpen) {
-        sidebar.classList.add("open");
-        overlay.classList.add("open");
-    } else {
-        sidebar.classList.remove("open");
-        overlay.classList.remove("open");
-    }
+let isCartOpen = false;
+
+function toggleCartPanel(forceOpen) {
+    isCartOpen = typeof forceOpen === 'boolean' ? forceOpen : !isCartOpen;
+
+    const sidebar   = document.getElementById('cartSidebar');
+    const overlay   = document.getElementById('cartOverlay');
+    const container = document.querySelector('.menu-app-container');
+
+    sidebar?.classList.toggle('open', isCartOpen);
+    overlay?.classList.toggle('open', isCartOpen);
+    container?.classList.toggle('cart-open', isCartOpen);
+    document.body.classList.toggle('cart-drawer-open', isCartOpen);
+
+    document.querySelectorAll('.header-cart-btn').forEach(btn => {
+        btn.setAttribute('aria-expanded', String(isCartOpen));
+        btn.setAttribute('aria-label', isCartOpen ? 'Close Basket' : 'Open Basket');
+    });
+
     updateBackToTopButton();
 }
 
@@ -1319,7 +1328,8 @@ const BasketComponent = {
     remove(lineKey) { removeFromBasket(lineKey); },
     clear() { clearBasket(); },
     getTotal() { return getBasketTotal(); },
-    togglePanel(isOpen) { toggleCartPanel(isOpen); }
+    togglePanel(isOpen) { toggleCartPanel(isOpen); },
+    isOpen() { return isCartOpen; }
 };
 
 let _floatingCartTimer = null;
@@ -1996,16 +2006,29 @@ function initBrandLogo() {
     }
 }
 
+function updateStickyOffsets() {
+    const nav = document.querySelector('.dmenu-nav-wrapper');
+    const searchBar = document.getElementById('menuStickyBar');
+    const navVisible = nav && getComputedStyle(nav).display !== 'none';
+    const navH = navVisible ? nav.offsetHeight : 0;
+    const searchH = searchBar?.offsetHeight ?? 0;
+    document.documentElement.style.setProperty('--sticky-nav-height', `${navH}px`);
+    document.documentElement.style.setProperty('--sticky-search-height', `${searchH}px`);
+}
+
 function setupStickyBar() {
     const bar = document.getElementById('menuStickyBar');
     if (!bar) return;
 
     const onScroll = () => {
         bar.classList.toggle('is-scrolled', window.scrollY > 8);
+        updateStickyOffsets();
         updateBackToTopButton();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateStickyOffsets, { passive: true });
+    updateStickyOffsets();
     onScroll();
 }
 
