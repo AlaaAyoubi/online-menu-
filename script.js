@@ -38,6 +38,9 @@ const UI_STRINGS = {
         buyNow: 'Buy Now',
         addToCart: 'Add to Cart',
         quantity: 'Quantity',
+        decreaseQty: 'Decrease quantity',
+        increaseQty: 'Increase quantity',
+        removeItem: 'Remove item',
         viewProduct: 'View item details',
         searchLabel: 'Search menu',
         searchPlaceholder: 'Search burgers, pizza…',
@@ -113,6 +116,9 @@ const UI_STRINGS = {
         buyNow: 'اطلب الآن',
         addToCart: 'أضف إلى السلة',
         quantity: 'الكمية',
+        decreaseQty: 'تقليل الكمية',
+        increaseQty: 'زيادة الكمية',
+        removeItem: 'إزالة الصنف',
         viewProduct: 'عرض تفاصيل الصنف',
         searchLabel: 'بحث في القائمة',
         searchPlaceholder: 'ابحث عن برغر، بيتزا…',
@@ -1220,20 +1226,22 @@ function buildCartRowsHTML() {
             : '';
         return `
         <div class="cart-row">
+            <img class="cart-row-thumb" src="${item.image}" alt="${escapeHtml(label)}" loading="lazy">
             <div class="cart-row-details">
-                <strong>${label}</strong>
+                <strong class="cart-row-title">${label}</strong>
                 ${addLine}
                 ${removeLine}
                 ${notesHtml}
-                <span>$${item.price.toFixed(2)} × ${item.quantity}</span>
+                <span class="cart-row-price">$${item.price.toFixed(2)}</span>
             </div>
-            <div class="qty-controls">
-                <button class="qty-btn icon-circle-btn" data-action="qty-decrease" data-line-key="${item.lineKey}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
-                <button class="qty-btn icon-circle-btn" data-action="qty-increase" data-line-key="${item.lineKey}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
-                <button class="delete-item-btn" data-action="remove-item" data-line-key="${item.lineKey}">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+            <div class="cart-row-stepper" role="group" aria-label="${t('quantity')}">
+                <button type="button" class="cart-row-stepper-btn icon-circle-btn" data-action="qty-decrease" data-line-key="${item.lineKey}" aria-label="${t('decreaseQty')}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                <span class="cart-row-qty" aria-live="polite">${item.quantity}</span>
+                <button type="button" class="cart-row-stepper-btn icon-circle-btn" data-action="qty-increase" data-line-key="${item.lineKey}" aria-label="${t('increaseQty')}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
             </div>
+            <button type="button" class="cart-row-delete" data-action="remove-item" data-line-key="${item.lineKey}" aria-label="${t('removeItem')}">
+                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+            </button>
         </div>`;
     }).join('');
 }
