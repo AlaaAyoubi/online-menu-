@@ -13,14 +13,20 @@
 <body>
 
     <!-- ── Desktop Navigation Tab Bar (hidden on mobile via CSS) ────────── -->
-    <div class="dmenu-nav-wrapper">
-        <a class="dmenu-nav-brand" href="#" aria-label="Foodle">
-            <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
-                 onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
-            <div class="brand-wordmark" id="brandWordmark" hidden>
-                <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
+    <div class="dmenu-nav-wrapper" id="mainNav">
+        <div class="dmenu-nav-brand">
+            <a class="dmenu-nav-logo" href="#" aria-label="Foodle">
+                <img src="assets/logo.png" alt="Foodle" class="brand-logo-img" id="brandLogo"
+                     onerror="this.hidden=true; document.getElementById('brandWordmark').hidden=false;">
+                <div class="brand-wordmark" id="brandWordmark" hidden>
+                    <span class="brand-wordmark-name" data-i18n="restaurantName">Foodle</span>
+                </div>
+            </a>
+            <div class="brand brand--nav">
+                <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
+                <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
             </div>
-        </a>
+        </div>
         <nav class="dmenu-desktop-tabs" id="desktopNav" role="navigation" aria-label="Main navigation">
             <button class="dmenu-tab dmenu-tab--active" data-view="menu" aria-current="page">
                 <i class="fa-solid fa-utensils" aria-hidden="true"></i>
@@ -37,6 +43,23 @@
             </button>
         </nav>
         <div class="dmenu-nav-actions">
+            <div class="nav-search" id="navSearch" role="search">
+                <button type="button" class="nav-search-toggle" id="navSearchToggle"
+                        data-i18n-aria="searchLabel" aria-label="Search menu"
+                        aria-expanded="false" aria-controls="navSearchPanel">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                </button>
+                <div class="nav-search-panel" id="navSearchPanel">
+                    <label class="visually-hidden" for="menuSearchInput" data-i18n="searchLabel">Search menu</label>
+                    <input type="search" id="menuSearchInput" class="nav-search-input"
+                           autocomplete="off" enterkeyhint="search"
+                           data-i18n-placeholder="searchPlaceholder">
+                    <button type="button" class="nav-search-close" id="navSearchClose"
+                            data-i18n-aria="searchClose" aria-label="Close search">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
             <button class="lang-toggle-btn"
                     onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
                     aria-label="Switch Language">
@@ -52,41 +75,6 @@
     <div class="menu-app-container">
         
         <main id="menu-view" class="menu-content">
-            <header class="menu-header">
-                <div class="brand">
-                    <h1><span data-i18n="menuTitle">Our Regular </span><span class="highlight" data-i18n="menuTitleHighlight">Menu</span></h1>
-                    <p data-i18n="tagline">Tap items to build your perfect delicious meal.</p>
-                </div>
-
-                <div class="header-actions">
-                    <button class="lang-toggle-btn"
-                            onclick="switchLanguage(ACTIVE_LANG === 'en' ? 'ar' : 'en')"
-                            aria-label="Switch Language">
-                        <span class="lang-label" aria-hidden="true"></span>
-                    </button>
-                    <button class="header-cart-btn" onclick="toggleCartPanel()" aria-label="Open Basket" aria-expanded="false">
-                        <i class="fa-solid fa-basket-shopping"></i>
-                    </button>
-                </div>
-
-            </header>
-
-            <div class="menu-sticky-bar" id="menuStickyBar">
-                <div class="menu-search" role="search">
-                    <label class="menu-search-label" for="menuSearchInput">
-                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                        <span class="visually-hidden" data-i18n="searchLabel">Search menu</span>
-                    </label>
-                    <input type="search" id="menuSearchInput" class="menu-search-input"
-                           autocomplete="off" enterkeyhint="search"
-                           data-i18n-placeholder="searchPlaceholder">
-                    <button type="button" id="menuSearchClear" class="menu-search-clear"
-                            data-i18n-aria="searchClear" aria-label="Clear search" hidden>
-                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-
             <nav class="categories-nav categories-row">
                 <button class="cat-btn active" data-category="all" onclick="filterMenu('all', event)">
                     <i class="fa-solid fa-border-all"></i> <span data-i18n="cat_all">All</span>

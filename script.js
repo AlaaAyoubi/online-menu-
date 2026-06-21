@@ -46,6 +46,7 @@ const UI_STRINGS = {
         searchPlaceholder: 'Search burgers, pizza…',
         searchNoResults: 'No items match your search.',
         searchClear: 'Clear search',
+        searchClose: 'Close search',
         restaurantName: 'Foodle',
         footerContact: 'Questions? Call +966 5X XXX XXXX',
         footerCopyright: '© 2026 Foodle. All rights reserved.',
@@ -124,6 +125,7 @@ const UI_STRINGS = {
         searchPlaceholder: 'ابحث عن برغر، بيتزا…',
         searchNoResults: 'لا توجد أصناف مطابقة لبحثك.',
         searchClear: 'مسح البحث',
+        searchClose: 'إغلاق البحث',
         restaurantName: 'فودل',
         footerContact: 'استفسارات؟ اتصل على +966 5X XXX XXXX',
         footerCopyright: '© 2026 فودل. جميع الحقوق محفوظة.',
@@ -630,11 +632,7 @@ function setActiveCategoryTab(category) {
 }
 
 function updateSearchClearButton() {
-    const clearBtn = document.getElementById('menuSearchClear');
-    const input = document.getElementById('menuSearchInput');
-    if (clearBtn && input) {
-        clearBtn.hidden = !input.value.trim();
-    }
+    /* no-op: expandable nav search uses close button instead */
 }
 
 function renderNoSearchResults() {
@@ -701,7 +699,6 @@ let searchDebounceTimer = null;
 
 function setupSearch() {
     const input = document.getElementById('menuSearchInput');
-    const clearBtn = document.getElementById('menuSearchClear');
     if (!input) return;
 
     input.addEventListener('input', () => {
@@ -709,10 +706,56 @@ function setupSearch() {
         searchDebounceTimer = setTimeout(handleSearchInput, 250);
     });
 
-    clearBtn?.addEventListener('click', () => clearSearch(true));
-
     input.addEventListener('search', () => {
         if (!input.value) clearSearch(true);
+    });
+}
+
+function setupExpandableSearch() {
+    const root = document.getElementById('navSearch');
+    const toggle = document.getElementById('navSearchToggle');
+    const closeBtn = document.getElementById('navSearchClose');
+    const input = document.getElementById('menuSearchInput');
+    if (!root || !toggle || !input) return;
+
+    const openSearch = () => {
+        root.classList.add('nav-search--open');
+        toggle.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => input.focus());
+    };
+
+    const closeSearch = () => {
+        root.classList.remove('nav-search--open');
+        toggle.setAttribute('aria-expanded', 'false');
+        clearSearch(true);
+    };
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (root.classList.contains('nav-search--open')) {
+            closeSearch();
+        } else {
+            openSearch();
+        }
+    });
+
+    closeBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSearch();
+        toggle.focus();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && root.classList.contains('nav-search--open')) {
+            closeSearch();
+            toggle.focus();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!root.classList.contains('nav-search--open')) return;
+        if (root.contains(e.target)) return;
+        closeSearch();
     });
 }
 
@@ -734,7 +777,7 @@ function filterMenu(category, event) {
 const MenuComponent = {
     refresh() { applyFiltersAndRender(); },
     load(category) { return loadMenu(category); },
-    setup() { setupSearch(); },
+    setup() { setupSearch(); setupExpandableSearch(); },
     filter(category, event) { filterMenu(category, event); }
 };
 
@@ -2007,17 +2050,15 @@ function initBrandLogo() {
 }
 
 function updateStickyOffsets() {
-    const nav = document.querySelector('.dmenu-nav-wrapper');
-    const searchBar = document.getElementById('menuStickyBar');
+    const nav = document.getElementById('mainNav') || document.querySelector('.dmenu-nav-wrapper');
     const navVisible = nav && getComputedStyle(nav).display !== 'none';
     const navH = navVisible ? nav.offsetHeight : 0;
-    const searchH = searchBar?.offsetHeight ?? 0;
     document.documentElement.style.setProperty('--sticky-nav-height', `${navH}px`);
-    document.documentElement.style.setProperty('--sticky-search-height', `${searchH}px`);
+    document.documentElement.style.setProperty('--sticky-search-height', '0px');
 }
 
 function setupStickyBar() {
-    const bar = document.getElementById('menuStickyBar');
+    const bar = document.getElementById('mainNav') || document.querySelector('.dmenu-nav-wrapper');
     if (!bar) return;
 
     const onScroll = () => {
