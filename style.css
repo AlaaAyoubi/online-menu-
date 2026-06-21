@@ -2506,6 +2506,24 @@ body.order-detail-modal-open {
     color: var(--text-main);
 }
 
+.order-detail-modal-header .icon-circle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border-light, #e0e0e0);
+    background: var(--surface-white);
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.order-detail-modal-header .icon-circle-btn:hover {
+    background: var(--bg-cream);
+    border-color: var(--text-main);
+}
+
 .order-detail-modal-body {
     flex: 1;
     min-height: 0;
