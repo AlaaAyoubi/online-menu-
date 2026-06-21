@@ -525,7 +525,7 @@ function showLoadingSkeleton() {
     if (!container) return;
     container.innerHTML = Array(6).fill(`
         <div class="skeleton-card">
-            <div class="skeleton-circle"></div>
+            <div class="skeleton-image"></div>
             <div class="skeleton-line skeleton-line--rating"></div>
             <div class="skeleton-line skeleton-line--title"></div>
             <div class="skeleton-line skeleton-line--title skeleton-line--short"></div>
