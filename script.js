@@ -1865,8 +1865,8 @@ function renderOrderDetail(order) {
     if (!content) return;
     content.innerHTML =
         renderOrderHeader(order) +
-        renderCustomerInfo(order.customer) +
         renderOrderItems(order.items) +
+        renderCustomerInfo(order.customer) +
         renderOrderSummary(order.totalPrice);
 }
 
@@ -1918,7 +1918,10 @@ function renderOrderItems(items) {
         const lineTotal = (item.price * item.quantity).toFixed(2);
 
         return `<div class="order-detail-receipt-row">
-            <span class="order-detail-receipt-item-name">${escapeHtml(item.title)} × ${item.quantity}${modsHtml}${notesHtml}</span>
+            <span class="order-detail-receipt-item-name">
+                <span class="order-detail-receipt-item-title">${escapeHtml(item.title)} × ${item.quantity}</span>
+                ${modsHtml}${notesHtml}
+            </span>
             <span class="order-detail-receipt-item-price">$${lineTotal}</span>
         </div>`;
     }).join('');
